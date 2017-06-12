@@ -1,0 +1,85 @@
+<?php
+/**
+ * Adds this plugin to the admin menu.
+ *
+ * @package tool_ilioscategoryassignment
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+if ($hassiteconfig) {
+
+    $ADMIN->add( 'root', new admin_category(
+        'ilioscategoryassignment',
+        get_string('pluginname', 'tool_ilioscategoryassignment')));
+
+
+    $ADMIN->add('ilioscategoryassignment', new admin_externalpage(
+        'ilioscategoryassignment_jobs',
+        get_string('pluginname', 'tool_ilioscategoryassignment'),
+        "$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
+        'moodle/site:config'
+    ));
+
+/*    $ADMIN->add('ilioscategoryassignment', new admin_externalpage(
+        'ilioscategoryassignment_clientconfig',
+        get_string('clientconfig', 'tool_ilioscategoryassignment'),
+        "$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/client/index.php",
+        'moodle/site:config'
+    ));*/
+
+    // API client settings page
+    $settings = new admin_settingpage(
+        'ilioscategoryassignment_clientconfig',
+        get_string('clientconfig', 'tool_ilioscategoryassignment'),
+        'moodle/site:config'
+    );
+
+    $settings->add(new admin_setting_heading('tool_ilioscategoryassignment_settings', '',
+        get_string('clientconfig_desc', 'tool_ilioscategoryassignment')));
+
+
+    if ( ! during_initial_install()) {
+        $settings->add(new admin_setting_configtext('tool_ilioscategoryassignment/host_url',
+            get_string('host_url', 'tool_ilioscategoryassignment'),
+            get_string('host_url_desc', 'tool_ilioscategoryassignment'), 'localhost'));
+        $settings->add(new admin_setting_configtext('tool_ilioscategoryassignment/apikey',
+            get_string('apikey', 'tool_ilioscategoryassignment'),
+            get_string('apikey_desc', 'tool_ilioscategoryassignment'), ''));
+        $settings->add(new admin_setting_configtext('tool_ilioscategoryassignment/userid',
+            get_string('userid', 'tool_ilioscategoryassignment'),
+            get_string('userid_desc', 'tool_ilioscategoryassignment'), ''));
+        $settings->add(new admin_setting_configpasswordunmask('tool_ilioscategoryassignment/secret',
+            get_string('secret', 'tool_ilioscategoryassignment'),
+            get_string('secret_desc', 'tool_ilioscategoryassignment'), ''));
+    }
+
+    $ADMIN->add('ilioscategoryassignment', $settings);
+
+}
+
+/*
+if ($ADMIN->fulltree) {
+
+    //--- general settings -----------------------------------------------------------------------------------
+    $settings->add(new admin_setting_heading('tool_ilioscategoryassignment_settings', '',
+        get_string('pluginname_desc', 'tool_ilioscategoryassignment')));
+
+
+    //--- ilios client settings  -----------------------------------------------------------------------------
+    if ( ! during_initial_install()) {
+        $settings->add(new admin_setting_configtext('tool_ilioscategoryassignment/host_url',
+            get_string('host_url', 'tool_ilioscategoryassignment'),
+            get_string('host_url_desc', 'tool_ilioscategoryassignment'), 'localhost'));
+        $settings->add(new admin_setting_configtext('tool_ilioscategoryassignment/apikey',
+            get_string('apikey', 'tool_ilioscategoryassignment'),
+            get_string('apikey_desc', 'tool_ilioscategoryassignment'), ''));
+        $settings->add(new admin_setting_configtext('tool_ilioscategoryassignment/userid',
+            get_string('userid', 'tool_ilioscategoryassignment'),
+            get_string('userid_desc', 'tool_ilioscategoryassignment'), ''));
+        $settings->add(new admin_setting_configpasswordunmask('tool_ilioscategoryassignment/secret',
+            get_string('secret', 'tool_ilioscategoryassignment'),
+            get_string('secret_desc', 'tool_ilioscategoryassignment'), ''));
+    }
+}
+*/
