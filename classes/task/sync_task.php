@@ -242,12 +242,12 @@ class sync_task extends \core\task\scheduled_task {
             }
         }
 
-       if ($remove_users_total) {
-           foreach ($remove_users as $user_id) {
-               mtrace("Assigning ${remove_users_total} user(s) from category.");
-               role_unassign($sync_job->get_role_id(), $user_id, $ctx->id);
-           }
-       }
+        if ($remove_users_total) {
+            foreach ($remove_users as $user_id) {
+                mtrace("Assigning ${remove_users_total} user(s) from category.");
+                role_unassign($sync_job->get_role_id(), $user_id, $ctx->id);
+            }
+        }
 
         mtrace("Finished syncing course category '{$formatted_category_name}'.");
     }
