@@ -157,7 +157,10 @@ class sync_task extends \core\task\scheduled_task {
                     'school' => $source->get_school_id(),
                     'roles' => $source->get_role_ids(),
                     'enabled' => true
-                )
+                ),
+                null,
+                5000
+
             );
             foreach($records as $rec) {
                 if (object_property_exists($rec, 'campusId')
