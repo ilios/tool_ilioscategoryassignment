@@ -241,14 +241,14 @@ class sync_task extends \core\task\scheduled_task {
         if ($add_users_total) {
             mtrace("Assigning ${add_users_total} user(s) into category.");
             foreach ($add_users as $user_id) {
-                role_assign($sync_job->get_role_id(), $user_id, $ctx->id);
+                role_assign($sync_job->get_role_id(), $user_id, $ctx->id, "tool_ilioscategoryassignment");
             }
         }
 
         if ($remove_users_total) {
             foreach ($remove_users as $user_id) {
                 mtrace("Assigning ${remove_users_total} user(s) from category.");
-                role_unassign($sync_job->get_role_id(), $user_id, $ctx->id);
+                role_unassign($sync_job->get_role_id(), $user_id, $ctx->id, "tool_ilioscategoryassignment");
             }
         }
 
