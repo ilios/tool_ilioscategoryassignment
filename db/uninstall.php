@@ -8,10 +8,12 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+/* @global $CFG */
+require_once($CFG->libdir . '/accesslib.php');
+
 /**
  * @return bool
  */
 function xmldb_tool_ilioscategoryassignment_uninstall() {
-    // @todo implement [ST 2017/07/10]
-    return true;
+    role_unassign_all(array('component' => 'tool_ilioscategoryassignment'));
 }
