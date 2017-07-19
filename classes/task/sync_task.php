@@ -30,13 +30,13 @@ class sync_task extends \core\task\scheduled_task {
     protected $config;
 
     /**
-     * @var
+     * @var ilios_client $ilios_api_client
      */
     protected $ilios_api_client;
 
     public function __construct() {
         $this->load_config();
-        $this->ilios_api_client = $this->load_ilios_client();
+        $this->load_ilios_client();
     }
 
     public function __destruct() {
@@ -252,22 +252,21 @@ class sync_task extends \core\task\scheduled_task {
         mtrace("Finished syncing course category '{$formatted_category_name}'.");
     }
 
-    /**
-     * @return ilios_client
-     */
     protected function load_ilios_client() {
-        $accesstoken = new \stdClass();
-        $accesstoken->token = $this->get_config('apikey');
-        $accesstoken->expires = $this->get_config('apikeyexpires');
+        if (! $this->ilios_api_client) {
+            $accesstoken = new \stdClass();
+            $accesstoken->token = $this->get_config('apikey');
+            $accesstoken->expires = $this->get_config('apikeyexpires');
 
-        return new ilios_client($this->get_config('host_url'),
-            $this->get_config('userid'),
-            $this->get_config('secret'),
-            $accesstoken);
+            $this->ilios_api_client =  new ilios_client($this->get_config('host_url'),
+                $this->get_config('userid'),
+                $this->get_config('secret'),
+                $accesstoken);
+        }
     }
 
     /**
-     * Returns plugin config value
+     * Returns plugin config value.
      * @param  string $name
      * @param  string $default value if config does not exist yet
      * @return string value or default
