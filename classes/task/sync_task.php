@@ -223,6 +223,12 @@ class sync_task extends \core\task\scheduled_task {
         $role->id = $sync_job->get_role_id();
         $ctx = $course_category->get_context();
         $role_assignments = get_users_from_role_on_context($role, $ctx);
+
+        $all_assigned_users = array();
+        if (! empty($role_assignments)) {
+            $all_assigned_users = array_column($role_assignments, 'userid');
+        }
+
         // filter out any role assignments that weren't made by this plugin
         $role_assignments = array_values(array_filter($role_assignments, function($role) {
            return $role->component === 'tool_ilioscategoryassignment';
@@ -233,6 +239,7 @@ class sync_task extends \core\task\scheduled_task {
             $assigned_users = array_column($role_assignments, 'userid');
         }
 
+        $out_of_band_assignments = array_diff($all_assigned_users, $assigned_users);
         $add_users = array_diff($user_ids, $assigned_users);
         $remove_users = array_diff($assigned_users, $user_ids);
 
@@ -243,18 +250,29 @@ class sync_task extends \core\task\scheduled_task {
             mtrace('No user assignment/un-assignment necessary.');
         }
 
+        $assignment_counter = 0;
         if ($add_users_total) {
-            mtrace("Assigning ${add_users_total} user(s) into category.");
             foreach ($add_users as $user_id) {
+                // Prevent double role assignment.
+                if (in_array($user_id, $out_of_band_assignments)) {
+                    mtrace("User with id = ${user_id} had this role assigned out-of-band, skipping.");
+                    continue;
+                }
                 role_assign($sync_job->get_role_id(), $user_id, $ctx->id, "tool_ilioscategoryassignment");
+                $assignment_counter++;
             }
+            mtrace("Assigned ${assignment_counter} user(s) into category.");
+
         }
 
+        $unassignment_counter = 0;
         if ($remove_users_total) {
             foreach ($remove_users as $user_id) {
-                mtrace("Assigning ${remove_users_total} user(s) from category.");
                 role_unassign($sync_job->get_role_id(), $user_id, $ctx->id, "tool_ilioscategoryassignment");
+                $unassignment_counter++;
             }
+            mtrace("Un-assigned {$unassignment_counter} user(s) from category.");
+
         }
 
         mtrace("Finished syncing course category '{$formatted_category_name}'.");
