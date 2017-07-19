@@ -123,15 +123,10 @@ class sync_task extends \core\task\scheduled_task {
             $ilios_users = $this->get_users_from_ilios($sync_job);
             if (empty($ilios_users)) {
                 mtrace('No Ilios users found to sync.');
-                return;
+            } else {
+                mtrace('Retrieved '. count($ilios_users) . ' Ilios user(s) to sync.');
             }
             $moodle_users = $this->get_moodle_users($ilios_users);
-            if (empty($moodle_users)) {
-                mtrace('After filtering, no user accounts remain to be synced.');
-                return;
-            } else {
-                mtrace('Syncing ' . count($moodle_users) . ' user accounts.');
-            }
 
             foreach($categories as $category) {
                 $this->sync_category($sync_job, $category, $moodle_users);
@@ -180,6 +175,9 @@ class sync_task extends \core\task\scheduled_task {
      */
     protected function get_moodle_users(array $ilios_users) {
         global $DB;
+        if (empty($ilios_users)) {
+            return array();
+        }
         list($insql, $params) = $DB->get_in_or_equal($ilios_users);
         $sql = "SELECT * FROM {user} WHERE idnumber $insql";
         $users = $DB->get_records_sql($sql, $params);
@@ -244,7 +242,7 @@ class sync_task extends \core\task\scheduled_task {
         $remove_users = array_diff($assigned_users, $user_ids);
 
         $add_users_total = count($add_users);
-        $remove_users_total = count($add_users);
+        $remove_users_total = count($remove_users);
 
         if (! $add_users_total && !$remove_users_total) {
             mtrace('No user assignment/un-assignment necessary.');
