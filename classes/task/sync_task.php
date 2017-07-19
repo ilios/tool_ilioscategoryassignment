@@ -223,6 +223,11 @@ class sync_task extends \core\task\scheduled_task {
         $role->id = $sync_job->get_role_id();
         $ctx = $course_category->get_context();
         $role_assignments = get_users_from_role_on_context($role, $ctx);
+        // filter out any role assignments that weren't made by this plugin
+        $role_assignments = array_values(array_filter($role_assignments, function($role) {
+           return $role->component === 'tool_ilioscategoryassignment';
+        }));
+
         $assigned_users = array();
         if (! empty($role_assignments)) {
             $assigned_users = array_column($role_assignments, 'userid');
