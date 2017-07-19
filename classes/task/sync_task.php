@@ -120,7 +120,7 @@ class sync_task extends \core\task\scheduled_task {
             } else {
                 mtrace('Retrieved '. count($categories) . ' to sync.');
             }
-            $ilios_users = $this->load_users_from_ilios($sync_job);
+            $ilios_users = $this->get_users_from_ilios($sync_job);
             if (empty($ilios_users)) {
                 mtrace('No Ilios users found to sync.');
                 return;
@@ -148,7 +148,7 @@ class sync_task extends \core\task\scheduled_task {
      *
      * @return string[]
      */
-    protected function load_users_from_ilios(sync_job $sync_job) {
+    protected function get_users_from_ilios(sync_job $sync_job) {
         $ilios_users = array();
         foreach($sync_job->get_sources() as $source) {
             $records = $this->ilios_api_client->get(
