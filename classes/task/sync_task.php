@@ -7,6 +7,7 @@
  */
 namespace tool_ilioscategoryassignment\task;
 
+use core\task\scheduled_task;
 use local_iliosapiclient\ilios_client;
 use tool_ilioscategoryassignment\sync_job;
 use tool_ilioscategoryassignment\sync_source;
@@ -22,7 +23,7 @@ require_once($CFG->libdir . '/accesslib.php');
  * @package  tool_ilioscategoryassignment
  * @category task
  */
-class sync_task extends \core\task\scheduled_task {
+class sync_task extends scheduled_task {
 
     /**
      * @var \stdClass $config This plugin's configuration.
