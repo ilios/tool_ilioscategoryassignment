@@ -113,19 +113,11 @@ class sync_task extends \core\task\scheduled_task {
         $job_title = $sync_job->get_title();
         mtrace("Started sync job '$job_title'.");
         try {
-            $categories = $this->get_categories_to_sync($sync_job->get_course_category_id());
-            if (empty($categories)) {
-                mtrace('No categories found to sync.');
-                return;
-            } else {
-                mtrace('Retrieved '. count($categories) . ' to sync.');
-            }
+            $course_category = \coursecat::get($sync_job->get_course_category_id());
             $ilios_users = $this->get_users_from_ilios($sync_job);
             mtrace('Retrieved '. count($ilios_users) . ' Ilios user(s) to sync.');
             $moodle_users = $this->get_moodle_users($ilios_users);
-            foreach($categories as $category) {
-                $this->sync_category($sync_job, $category, $moodle_users);
-            }
+            $this->sync_category($sync_job, $course_category, $moodle_users);
         } catch (\Exception $e) {
             mtrace('An error occurred: ' . $e->getMessage());
         } finally {
@@ -184,32 +176,12 @@ class sync_task extends \core\task\scheduled_task {
         return array_column($users, 'id');
 
     }
-
-    /**
-     * @param int $category_id
-     *
-     * @return int[]
-     */
-    protected function get_categories_to_sync($category_id) {
-
-        $category_ids = array();
-        $course_category = \coursecat::get($category_id);
-        $category_ids[] = $category_id;
-        if ($course_category->has_children()) {
-            foreach($course_category->get_children() as $cat) {
-                $category_ids = array_merge($category_ids, $this->get_categories_to_sync($cat->id));
-            }
-        }
-        return($category_ids);
-    }
-
     /**
      * @param sync_job $sync_job
-     * @param int $category_id
+     * @param \coursecat $course_category
      * @param int[] $user_ids
      */
-    public function sync_category(sync_job $sync_job, $category_id, array $user_ids) {
-        $course_category = \coursecat::get($category_id);
+    public function sync_category(sync_job $sync_job, \coursecat $course_category, array $user_ids) {
         $formatted_category_name = $course_category->get_formatted_name();
         mtrace("Started syncing course category '{$formatted_category_name}'.");
         $role = new \stdClass();
