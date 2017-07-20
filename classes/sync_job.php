@@ -41,7 +41,8 @@ class sync_job {
      * @param $modified_by
      * @param sync_source[] $sources
      */
-    public function __construct($id, $title, $role_id, $course_category_id, $enabled, $created_at, $updated_at, $modified_by, array $sources = array()) {
+    public function __construct($id, $title, $role_id, $course_category_id, $enabled, $created_at, $updated_at, $modified_by,
+            array $sources = array()) {
         $this->id = $id;
         $this->title = $title;
         $this->role_id = $role_id;
