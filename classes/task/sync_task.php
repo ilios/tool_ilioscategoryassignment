@@ -78,8 +78,8 @@ class sync_task extends scheduled_task {
         try {
             $ilios_client = $this->instantiate_ilios_client();
         } catch (\Exception $e) {
-            mtrace('ERROR: Failed to instantiate Ilios client.');
-            return;
+            // re-throw exception
+            throw new \Exception('ERROR: Failed to instantiate Ilios client.'. 0, $e);
         }
 
         // run enabled each sync job
@@ -134,17 +134,12 @@ class sync_task extends scheduled_task {
     protected function run_sync_job(sync_job $sync_job, ilios_client $ilios_client) {
         $job_title = $sync_job->get_title();
         mtrace("Started sync job '$job_title'.");
-        try {
-            $course_category = \coursecat::get($sync_job->get_course_category_id());
-            $ilios_users = $this->get_users_from_ilios($sync_job, $ilios_client);
-            mtrace('Retrieved ' . count($ilios_users) . ' Ilios user(s) to sync.');
-            $moodle_users = $this->get_moodle_users($ilios_users);
-            $this->sync_category($sync_job, $course_category, $moodle_users);
-        } catch (\Exception $e) {
-            mtrace('ERROR: ' . $e->getMessage());
-        } finally {
-            mtrace("Finished sync job '$job_title'.");
-        }
+        $course_category = \coursecat::get($sync_job->get_course_category_id());
+        $ilios_users = $this->get_users_from_ilios($sync_job, $ilios_client);
+        mtrace('Retrieved ' . count($ilios_users) . ' Ilios user(s) to sync.');
+        $moodle_users = $this->get_moodle_users($ilios_users);
+        $this->sync_category($sync_job, $course_category, $moodle_users);
+        mtrace("Finished sync job '$job_title'.");
     }
 
     /**
@@ -176,7 +171,7 @@ class sync_task extends scheduled_task {
             } catch (\Exception $e) {
                 // re-throw exception with a better error message
                 throw new \Exception('Failed to retrieve users from Ilios with the following parameters: ' .
-                        print_r($filters, true));
+                        print_r($filters, true), 0, $e);
             }
 
             foreach ($records as $rec) {
