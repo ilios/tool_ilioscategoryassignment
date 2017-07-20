@@ -35,11 +35,17 @@ class sync_task extends scheduled_task {
      */
     protected $ilios_api_client;
 
+    /**
+     * Constructor
+     */
     public function __construct() {
         $this->load_config();
         $this->load_ilios_client();
     }
 
+    /**
+     * Destructor
+     */
     public function __destruct() {
         $accesstoken = $this->ilios_api_client->getAccessToken();
         $apikey = $this->get_config('apikey');
@@ -108,6 +114,8 @@ class sync_task extends scheduled_task {
     }
 
     /**
+     * Performs a given sync job.
+     *
      * @param sync_job $sync_job
      */
     protected function run_sync_job(sync_job $sync_job) {
@@ -127,9 +135,9 @@ class sync_task extends scheduled_task {
     }
 
     /**
+     * Retrieves a list of user campus IDs from Ilios qualifiying for the given sync job.
      * @param sync_job $sync_job
-     *
-     * @return string[]
+     * @return string[] A list of campus IDs.
      */
     protected function get_users_from_ilios(sync_job $sync_job) {
         $ilios_users = array();
@@ -157,9 +165,10 @@ class sync_task extends scheduled_task {
     }
 
     /**
-     * @param string[] $ilios_users
+     * Retrieves the IDs of all users matching a given list of Ilios user campus IDs.
      *
-     * @return int[]
+     * @param string[] $ilios_users The campus IDs of users retrieved from Ilios.
+     * @return int[] A list of Moodle user IDs.
      */
     protected function get_moodle_users(array $ilios_users) {
         global $DB;
@@ -178,6 +187,8 @@ class sync_task extends scheduled_task {
 
     }
     /**
+     * Updates users role assignment in a given category.
+     *
      * @param sync_job $sync_job
      * @param \coursecat $course_category
      * @param int[] $user_ids
@@ -244,6 +255,11 @@ class sync_task extends scheduled_task {
         mtrace("Finished syncing course category '{$formatted_category_name}'.");
     }
 
+    /**
+     * Instantiates an Ilios API client instance.
+     *
+     * @throws \moodle_exception
+     */
     protected function load_ilios_client() {
         if (! $this->ilios_api_client) {
             $accesstoken = new \stdClass();
@@ -284,7 +300,6 @@ class sync_task extends scheduled_task {
 
     /**
      * Makes sure config is loaded and cached.
-     * @return void
      */
     protected function load_config() {
         if (!isset($this->config)) {
