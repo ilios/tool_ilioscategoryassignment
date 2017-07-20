@@ -121,13 +121,8 @@ class sync_task extends \core\task\scheduled_task {
                 mtrace('Retrieved '. count($categories) . ' to sync.');
             }
             $ilios_users = $this->get_users_from_ilios($sync_job);
-            if (empty($ilios_users)) {
-                mtrace('No Ilios users found to sync.');
-            } else {
-                mtrace('Retrieved '. count($ilios_users) . ' Ilios user(s) to sync.');
-            }
+            mtrace('Retrieved '. count($ilios_users) . ' Ilios user(s) to sync.');
             $moodle_users = $this->get_moodle_users($ilios_users);
-
             foreach($categories as $category) {
                 $this->sync_category($sync_job, $category, $moodle_users);
             }
