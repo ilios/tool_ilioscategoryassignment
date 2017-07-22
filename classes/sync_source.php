@@ -38,4 +38,20 @@ class sync_source {
     public function get_role_ids() {
         return $this->role_ids;
     }
+
+    /**
+     * @param string $prop
+     * @return mixed
+     */
+    public function __get($prop) {
+        return $this->$prop;
+    }
+
+    /**
+     * @param string $prop
+     * @return bool
+     */
+    public function __isset($prop) {
+        return isset($this->$prop);
+    }
 }

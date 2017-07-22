@@ -116,4 +116,20 @@ class sync_job {
     public function is_enabled() {
         return $this->enabled;
     }
+
+    /**
+     * @param string $prop
+     * @return mixed
+     */
+    public function __get($prop) {
+        return $this->$prop;
+    }
+
+    /**
+     * @param string $prop
+     * @return bool
+     */
+    public function __isset($prop) {
+        return isset($this->$prop);
+    }
 }

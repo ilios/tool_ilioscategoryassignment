@@ -19,7 +19,7 @@ if ($hassiteconfig) {
     // Sync jobs admin page
     $ADMIN->add('ilioscategoryassignment', new admin_externalpage(
             'ilioscategoryassignment_jobs',
-            get_string('pluginname', 'tool_ilioscategoryassignment'),
+            get_string('syncjobs', 'tool_ilioscategoryassignment'),
             "$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
             'moodle/site:config'
     ));
