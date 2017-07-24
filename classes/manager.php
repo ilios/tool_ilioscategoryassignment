@@ -8,15 +8,16 @@
 namespace tool_ilioscategoryassignment;
 
 /* @global $CFG */
+use local_iliosapiclient\ilios_client;
+
 require_once($CFG->libdir . '/coursecatlib.php');
 require_once($CFG->libdir . '/accesslib.php');
 
 /**
- * The kitchen sink.
  * Handles sync job, configuration and Ilios client management.
  *
- * This is obviously less than ideal, but still better than having functions in locallib.php,
- * polluting the global namespace.
+ * In other words, this is kitchen sink.
+ * This is obviously less than ideal, but still better than polluting the global namespace with functions in locallib.php.
  * [ST 2017/07/24]
  *
  * @package tool_ilioscategoryassignment
@@ -24,6 +25,24 @@ require_once($CFG->libdir . '/accesslib.php');
 class manager {
 
     const PLUGIN_NAME = 'tool_ilioscategoryassignment';
+
+    /**
+     * Instantiates and returns an Ilios API client.
+     *
+     * @return ilios_client
+     * @throws \moodle_exception
+     */
+    public static function instantiate_ilios_client() {
+        $accesstoken = new \stdClass();
+        $accesstoken->token = manager::get_config('apikey');
+        $accesstoken->expires = manager::get_config('apikeyexpires');
+
+        return new ilios_client(manager::get_config('host_url'),
+                manager::get_config('userid'),
+                manager::get_config('secret'),
+                $accesstoken);
+    }
+
 
     /**
      * @param $id

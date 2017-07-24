@@ -64,7 +64,7 @@ class sync_task extends scheduled_task {
 
         $ilios_client = null;
         try {
-            $ilios_client = $this->instantiate_ilios_client();
+            $ilios_client = manager::instantiate_ilios_client();
         } catch (\Exception $e) {
             // re-throw exception
             throw new \Exception('ERROR: Failed to instantiate Ilios client.' . 0, $e);
@@ -244,22 +244,5 @@ class sync_task extends scheduled_task {
         }
 
         mtrace("Finished syncing course category '{$formatted_category_name}'.");
-    }
-
-    /**
-     * Instantiates and returns an Ilios API client.
-     *
-     * @return ilios_client
-     * @throws \moodle_exception
-     */
-    protected function instantiate_ilios_client() {
-        $accesstoken = new \stdClass();
-        $accesstoken->token = manager::get_config('apikey');
-        $accesstoken->expires = manager::get_config('apikeyexpires');
-
-        return new ilios_client(manager::get_config('host_url'),
-                manager::get_config('userid'),
-                manager::get_config('secret'),
-                $accesstoken);
     }
 }
