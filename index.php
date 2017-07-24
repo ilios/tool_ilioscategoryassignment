@@ -40,10 +40,27 @@ $ilios_schools = array();
 $ilios_roles = array();
 
 
+
 if (!empty($jobs)) {
     $course_category_ids = array_column($jobs, 'course_category_id');
     $course_categories = \coursecat::get_many($course_category_ids);
     $roles = \role_get_names();
+}
+
+try {
+    $ilios_client = manager::instantiate_ilios_client();
+    $ilios_schools = $ilios_client->get('schools');
+    if (!empty($ilios_schools)) {
+        $ilios_school_ids = array_column($ilios_schools, 'id');
+        $ilios_schools = array_combine($ilios_school_ids, $ilios_schools);
+    }
+    $ilios_roles = $ilios_client->get('userRoles');
+    if (!empty($ilios_roles)) {
+        $ilios_role_ids = array_column($ilios_roles, 'id');
+        $ilios_roles = array_combine($ilios_role_ids, $ilios_roles);
+    }
+} catch (\Exception $e) {
+    echo $renderer->notify_error(get_string('ilioserror', 'tool_ilioscategoryassignment'));
 }
 
 $title = get_string('syncjobs', 'tool_ilioscategoryassignment') . ' (' . count($jobs) . ')';
