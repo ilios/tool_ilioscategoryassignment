@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Sync job manager.
+ *
+ * @package tool_ilioscategoryassignment
+ */
 namespace tool_ilioscategoryassignment;
 
 /* @global $CFG */
@@ -7,10 +12,9 @@ require_once($CFG->libdir . '/coursecatlib.php');
 require_once($CFG->libdir . '/accesslib.php');
 
 /**
- * Sync job definition model.
+ * Sync job manager.
  *
  * @package tool_ilioscategoryassignment
- * @category model
  */
 class manager {
 
