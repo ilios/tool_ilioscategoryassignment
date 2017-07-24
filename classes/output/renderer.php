@@ -2,6 +2,7 @@
 
 namespace tool_ilioscategoryassignment\output;
 
+use core\output\notification;
 use plugin_renderer_base;
 use tool_ilioscategoryassignment\sync_job;
 
@@ -45,36 +46,50 @@ class renderer extends plugin_renderer_base {
         );
         $table->attributes['class'] = 'admintable generaltable';
         $data = array();
-        $not_found_label = '[[ ' . get_string('notfound', 'tool_ilioscategoryassignment') . ' ]]';
 
         foreach ($sync_jobs as $job) {
             $titlecell = new \html_table_cell($job->get_title());
             $titlecell->header = true;
 
             $course_category_id = $job->get_course_category_id();
-            $course_title = $not_found_label;
-            if (! empty($course_categories[$course_category_id])) {
+            $course_title = $this->get_not_found_message($course_category_id);
+            if (!empty($course_categories[$course_category_id])) {
                 $course_title = $course_categories[$course_category_id]->get_formatted_name();
             }
             $coursecatcell = new \html_table_cell($course_title);
 
             $role_id = $job->get_role_id();
-            $role_title = $not_found_label;
+            $role_title = $this->get_not_found_message($role_id);
             if (array_key_exists($role_id, $roles)) {
                 $role_title = $roles[$role_id]->name;
             }
-
             $rolecell = new \html_table_cell($role_title);
 
             $source = $job->get_sources()[0]; // there should be exactly one.
-            $iliosschoolcell = new \html_table_cell($source->get_school_id());
-            $iliosrolecell = new \html_table_cell(implode(', ', $source->get_role_ids()));
+
+            $ilios_school_id = $source->get_school_id();
+            $ilios_school_title = $this->get_not_found_message($ilios_school_id);
+            if (array_key_exists($ilios_school_id, $ilios_schools)) {
+                $ilios_school_title = $ilios_schools[$ilios_school_id]->title;
+            }
+
+            $iliosschoolcell = new \html_table_cell($ilios_school_title);
+
+            $ilios_role_titles = array();
+            foreach ($source->get_role_ids() as $role_id) {
+                if (array_key_exists($role_id, $ilios_roles)) {
+                    $ilios_role_titles[] = $ilios_roles[$role_id]->title;
+                } else {
+                    $ilios_role_titles[] = $this->get_not_found_message($role_id);
+                }
+            }
+            $iliosrolecell = new \html_table_cell(implode(', ', $ilios_role_titles));
 
             $actions = array();
             if ($job->is_enabled()) {
                 $actions[] = $this->action_icon(
                         new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/actions.php",
-                            array('job_id' => $job->get_id(), 'action' => 'disable', 'sesskey' => \sesskey())),
+                                array('job_id' => $job->get_id(), 'action' => 'disable', 'sesskey' => \sesskey())),
                         new \pix_icon('t/hide', new \lang_string('disable'))
                 );
             } else {
@@ -91,7 +106,6 @@ class renderer extends plugin_renderer_base {
                     new \pix_icon('t/delete', new \lang_string('delete'))
             );
 
-
             $actionscell = new \html_table_cell(implode(' ', $actions));
 
             $row = new \html_table_row(array(
@@ -106,5 +120,50 @@ class renderer extends plugin_renderer_base {
         }
         $table->data = $data;
         return \html_writer::table($table);
+    }
+
+    /**
+     * @param int $id
+     * @return string
+     */
+    protected function get_not_found_message($id) {
+        static $not_found = null;
+        if (!isset($not_found)) {
+            $not_found = get_string('notfound', 'tool_ilioscategoryassignment');
+        }
+        return "[[ ${not_found} (id = ${id}) ]]";
+    }
+
+    /**
+     * Renders and returns a notification.
+     *
+     * @param string $message the message
+     * @return string The formatted message.
+     */
+    public function notify_info($message) {
+        $n = new notification($message, notification::NOTIFY_INFO);
+        return $this->render($n);
+    }
+
+    /**
+     * Renders and returns an error notification.
+     *
+     * @param string $message the message
+     * @return string The formatted message.
+     */
+    public function notify_error($message) {
+        $n = new notification($message, notification::NOTIFY_ERROR);
+        return $this->render($n);
+    }
+
+    /**
+     * Renders and returns a success notification.
+     *
+     * @param string $message the message
+     * @return string The formatted message.
+     */
+    public function notify_success($message) {
+        $n = new notification($message, notification::NOTIFY_SUCCESS);
+        return $this->render($n);
     }
 }
