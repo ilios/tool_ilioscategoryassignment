@@ -88,20 +88,20 @@ class renderer extends plugin_renderer_base {
             $actions = array();
             if ($job->is_enabled()) {
                 $actions[] = $this->action_icon(
-                        new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/actions.php",
+                        new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
                                 array('job_id' => $job->get_id(), 'action' => 'disable', 'sesskey' => \sesskey())),
                         new \pix_icon('t/hide', new \lang_string('disable'))
                 );
             } else {
                 $actions[] = $this->action_icon(
-                        new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/actions.php",
+                        new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
                                 array('job_id' => $job->get_id(), 'action' => 'enable', 'sesskey' => \sesskey())),
                         new \pix_icon('t/show', new \lang_string('enable'))
                 );
             }
 
             $actions[] = $this->action_icon(
-                    new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/actions.php",
+                    new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
                             array('job_id' => $job->get_id(), 'action' => 'delete', 'sesskey' => \sesskey())),
                     new \pix_icon('t/delete', new \lang_string('delete'))
             );

@@ -18,28 +18,57 @@ require_capability('moodle/site:config', context_system::instance());
 require_once($CFG->libdir.'/adminlib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
+$action = optional_param('action', 'list', PARAM_ALPHA);
 
-
-$PAGE->set_url('/admin/tool/ilioscategoryassignment/index.php');
+/* @var moodle_page $PAGE */
+/* @var renderer $renderer */
 $PAGE->set_context(context_system::instance());
+$PAGE->set_url('/admin/tool/ilioscategoryassignment/index.php');
 $PAGE->set_pagelayout('admin');
 $strheading = get_string('scheduledtasks', 'tool_task');
 $PAGE->set_title($strheading);
 $PAGE->set_heading($strheading);
 
-/* @var renderer $renderer */
 $renderer = $PAGE->get_renderer('tool_ilioscategoryassignment');
+
 
 /* @var core_renderer $OUTPUT */
 echo $OUTPUT->header();
+
+if (in_array($action, array('enable', 'disable', 'delete'))) {
+    require_sesskey();
+    $job_id = required_param('job_id', PARAM_INT);
+    $job = manager::get_sync_job($job_id);
+    if (!empty($job)) {
+        switch ($action) {
+            case 'enable':
+                manager::enable_job($job_id);
+                echo $renderer->notify_success(
+                        get_string('jobenabled', 'tool_ilioscategoryassignment', $job->get_title())
+                );
+                break;
+            case 'disable':
+                manager::disable_job($job_id);
+                echo $renderer->notify_success(
+                        get_string('jobdisabled', 'tool_ilioscategoryassignment', $job->get_title())
+                );
+                break;
+            case 'delete':
+                 manager::delete_job($job_id);
+                 echo $renderer->notify_success(
+                        get_string('jobdeleted', 'tool_ilioscategoryassignment', $job->get_title())
+                 );
+        }
+    }
+}
+
+
 $jobs = manager::get_sync_jobs();
 
 $course_categories = array();
 $roles = array();
 $ilios_schools = array();
 $ilios_roles = array();
-
-
 
 if (!empty($jobs)) {
     $course_category_ids = array_column($jobs, 'course_category_id');
@@ -67,3 +96,6 @@ $title = get_string('syncjobs', 'tool_ilioscategoryassignment') . ' (' . count($
 echo $OUTPUT->heading($title);
 echo $renderer->sync_jobs_table($jobs, $course_categories,$roles, $ilios_schools, $ilios_roles);
 echo $OUTPUT->footer();
+
+
+
