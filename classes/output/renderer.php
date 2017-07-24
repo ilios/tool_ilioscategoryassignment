@@ -53,7 +53,7 @@ class renderer extends plugin_renderer_base {
 
             $course_category_id = $job->get_course_category_id();
             $course_title = $not_found_label;
-            if (array_key_exists($course_category_id, $course_categories)) {
+            if (! empty($course_categories[$course_category_id])) {
                 $course_title = $course_categories[$course_category_id]->get_formatted_name();
             }
             $coursecatcell = new \html_table_cell($course_title);
