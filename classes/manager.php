@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sync job manager.
+ * Handles sync job, configuration and Ilios client management.
  *
  * @package tool_ilioscategoryassignment
  */
@@ -12,11 +12,18 @@ require_once($CFG->libdir . '/coursecatlib.php');
 require_once($CFG->libdir . '/accesslib.php');
 
 /**
- * Sync job manager.
+ * The kitchen sink.
+ * Handles sync job, configuration and Ilios client management.
+ *
+ * This is obviously less than ideal, but still better than having functions in locallib.php,
+ * polluting the global namespace.
+ * [ST 2017/07/24]
  *
  * @package tool_ilioscategoryassignment
  */
 class manager {
+
+    const PLUGIN_NAME = 'tool_ilioscategoryassignment';
 
     /**
      * @param $id
@@ -25,6 +32,48 @@ class manager {
     public static function get_sync_job($id) {
         $jobs = self::get_sync_jobs(array('id' => $id));
         return empty($jobs) ? null : $jobs[0];
+    }
+
+    /**
+     * Loads, caches and returns the configuration for this plugin.
+     * @return \stdClass
+     * @see get_config()
+     */
+    public static function get_plugin_config() {
+        static $config = null;
+        if (!isset($config)) {
+            $config = get_config(self::PLUGIN_NAME);
+        }
+        return $config;
+    }
+
+    /**
+     * Returns a configuration value by its given name or a given default value.
+     *
+     * @param string $name
+     * @param string $default value if config does not exist yet
+     *
+     * @return string value or default
+     */
+    public static function get_config($name, $default = null) {
+        $config = self::get_plugin_config();
+        return isset($config->$name) ? $config->$name : $default;
+    }
+
+    /**
+     * Sets and stores a given config value.
+     *
+     * @param string $name name of config
+     * @param string $value string config value, null means delete
+     */
+    public static function set_config($name, $value) {
+        $config = self::get_plugin_config();
+        if ($value === null) {
+            unset($config->$name);
+        } else {
+            $config->$name = $value;
+        }
+        set_config($name, $value, self::PLUGIN_NAME);
     }
 
     /**

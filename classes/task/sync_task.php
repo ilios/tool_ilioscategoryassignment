@@ -12,7 +12,6 @@ use core\task\scheduled_task;
 use local_iliosapiclient\ilios_client;
 use tool_ilioscategoryassignment\manager;
 use tool_ilioscategoryassignment\sync_job;
-use tool_ilioscategoryassignment\sync_source;
 
 /* @global $CFG */
 require_once($CFG->libdir . '/coursecatlib.php');
@@ -27,28 +26,16 @@ require_once($CFG->libdir . '/accesslib.php');
 class sync_task extends scheduled_task {
 
     /**
-     * @var \stdClass $config This plugin's configuration.
-     */
-    protected $config;
-
-    /**
-     * Constructor
-     */
-    public function __construct() {
-        $this->load_config();
-    }
-
-    /**
      * Updates the Ilios API token in the plugin configuration.
      *
      * @param ilios_client $ilios_client
      */
     public function save_api_token(ilios_client $ilios_client) {
         $accesstoken = $ilios_client->getAccessToken();
-        $apikey = $this->get_config('apikey');
+        $apikey = manager::get_config('apikey');
         if (!empty($accesstoken) && ($apikey !== $accesstoken->token)) {
-            $this->set_config('apikey', $accesstoken->token);
-            $this->set_config('apikeyexpires', $accesstoken->expires);
+            manager::set_config('apikey', $accesstoken->token);
+            manager::set_config('apikeyexpires', $accesstoken->expires);
         }
     }
 
@@ -80,7 +67,7 @@ class sync_task extends scheduled_task {
             $ilios_client = $this->instantiate_ilios_client();
         } catch (\Exception $e) {
             // re-throw exception
-            throw new \Exception('ERROR: Failed to instantiate Ilios client.'. 0, $e);
+            throw new \Exception('ERROR: Failed to instantiate Ilios client.' . 0, $e);
         }
 
         // run enabled each sync job
@@ -267,49 +254,12 @@ class sync_task extends scheduled_task {
      */
     protected function instantiate_ilios_client() {
         $accesstoken = new \stdClass();
-        $accesstoken->token = $this->get_config('apikey');
-        $accesstoken->expires = $this->get_config('apikeyexpires');
+        $accesstoken->token = manager::get_config('apikey');
+        $accesstoken->expires = manager::get_config('apikeyexpires');
 
-        return new ilios_client($this->get_config('host_url'),
-                $this->get_config('userid'),
-                $this->get_config('secret'),
+        return new ilios_client(manager::get_config('host_url'),
+                manager::get_config('userid'),
+                manager::get_config('secret'),
                 $accesstoken);
-    }
-
-    /**
-     * Returns plugin config value.
-     *
-     * @param  string $name
-     * @param  string $default value if config does not exist yet
-     *
-     * @return string value or default
-     */
-    protected function get_config($name, $default = null) {
-        return isset($this->config->$name) ? $this->config->$name : $default;
-    }
-
-    /**
-     * Sets plugin config value
-     *
-     * @param  string $name name of config
-     * @param  string $value string config value, null means delete
-     */
-    public function set_config($name, $value) {
-        $this->load_config();
-        if ($value === null) {
-            unset($this->config->$name);
-        } else {
-            $this->config->$name = $value;
-        }
-        set_config($name, $value, "tool_ilioscategoryassignment");
-    }
-
-    /**
-     * Makes sure config is loaded and cached.
-     */
-    protected function load_config() {
-        if (!isset($this->config)) {
-            $this->config = get_config("tool_ilioscategoryassignment");
-        }
     }
 }
