@@ -15,8 +15,8 @@ require_login();
 require_capability('moodle/site:config', context_system::instance());
 
 /* @var $CFG */
-require_once($CFG->libdir.'/adminlib.php');
-require_once($CFG->libdir.'/tablelib.php');
+require_once($CFG->libdir . '/adminlib.php');
+require_once($CFG->libdir . '/tablelib.php');
 
 $action = optional_param('action', 'list', PARAM_ALPHA);
 
@@ -25,12 +25,11 @@ $action = optional_param('action', 'list', PARAM_ALPHA);
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url('/admin/tool/ilioscategoryassignment/index.php');
 $PAGE->set_pagelayout('admin');
-$strheading = get_string('scheduledtasks', 'tool_task');
+$strheading = get_string('syncjobs', 'tool_ilioscategoryassignment');
 $PAGE->set_title($strheading);
 $PAGE->set_heading($strheading);
 
 $renderer = $PAGE->get_renderer('tool_ilioscategoryassignment');
-
 
 /* @var core_renderer $OUTPUT */
 echo $OUTPUT->header();
@@ -54,14 +53,13 @@ if (in_array($action, array('enable', 'disable', 'delete'))) {
                 );
                 break;
             case 'delete':
-                 manager::delete_job($job_id);
-                 echo $renderer->notify_success(
+                manager::delete_job($job_id);
+                echo $renderer->notify_success(
                         get_string('jobdeleted', 'tool_ilioscategoryassignment', $job->get_title())
-                 );
+                );
         }
     }
 }
-
 
 $jobs = manager::get_sync_jobs();
 
@@ -94,7 +92,7 @@ try {
 
 $title = get_string('syncjobs', 'tool_ilioscategoryassignment') . ' (' . count($jobs) . ')';
 echo $OUTPUT->heading($title);
-echo $renderer->sync_jobs_table($jobs, $course_categories,$roles, $ilios_schools, $ilios_roles);
+echo $renderer->sync_jobs_table($jobs, $course_categories, $roles, $ilios_schools, $ilios_roles);
 echo $OUTPUT->footer();
 
 
