@@ -61,7 +61,7 @@ class renderer extends plugin_renderer_base {
             $role_id = $job->get_role_id();
             $role_title = $this->get_not_found_message($role_id);
             if (array_key_exists($role_id, $roles)) {
-                $role_title = $roles[$role_id]->name;
+                $role_title = $roles[$role_id]->localname;
             }
             $rolecell = new \html_table_cell($role_title);
 
