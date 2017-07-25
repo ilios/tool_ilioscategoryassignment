@@ -24,6 +24,14 @@ if ($hassiteconfig) {
             'moodle/site:config'
     ));
 
+    // New job page
+    $ADMIN->add('ilioscategoryassignment', new admin_externalpage(
+            'ilioscategoryassignment_new_jobs',
+            get_string('newsyncjob', 'tool_ilioscategoryassignment'),
+            "$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/create.php",
+            'moodle/site:config'
+    ));
+
     // API client settings page
     $settings = new admin_settingpage(
             'ilioscategoryassignment_clientconfig',
