@@ -120,8 +120,7 @@ class manager {
                 $job_sources[] = new sync_source($school_id, $role_ids);
             }
             $jobs[] = new sync_job($job_rec->id, $job_rec->title, $job_rec->roleid, $job_rec->coursecatid,
-                    (boolean) $job_rec->enabled, $job_rec->timecreated, $job_rec->timemodified, $job_rec->usermodified,
-                    $job_sources);
+                    (boolean) $job_rec->enabled, $job_sources);
         }
 
         return $jobs;

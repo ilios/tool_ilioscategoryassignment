@@ -19,12 +19,6 @@ class sync_job {
     protected $course_category_id;
     /** @var  bool $enabled */
     protected $enabled;
-    /** @var  int $created_at */
-    protected $created_at;
-    /** @var  int $updated_at */
-    protected $updated_at;
-    /** @var  int $modified_by */
-    protected $modified_by;
     /** @var  sync_source[] $sources */
     protected $sources;
 
@@ -36,22 +30,15 @@ class sync_job {
      * @param $role_id
      * @param $course_category_id
      * @param $enabled
-     * @param $created_at
-     * @param $updated_at
-     * @param $modified_by
      * @param sync_source[] $sources
      */
-    public function __construct($id, $title, $role_id, $course_category_id, $enabled, $created_at, $updated_at, $modified_by,
-            array $sources = array()) {
+    public function __construct($id, $title, $role_id, $course_category_id, $enabled, array $sources = array()) {
         $this->id = $id;
         $this->title = $title;
         $this->role_id = $role_id;
         $this->course_category_id = $course_category_id;
         $this->enabled = $enabled;
-        $this->created_at = $created_at;
-        $this->updated_at = $updated_at;
-        $this->modified_by = $modified_by;
-        $this->sources = $sources;
+         $this->sources = $sources;
     }
 
     /**
@@ -66,27 +53,6 @@ class sync_job {
      */
     public function get_title() {
         return $this->title;
-    }
-
-    /**
-     * @return int
-     */
-    public function get_created_at() {
-        return $this->created_at;
-    }
-
-    /**
-     * @return int
-     */
-    public function get_updated_at() {
-        return $this->created_at;
-    }
-
-    /**
-     * @return int
-     */
-    public function get_modified_by() {
-        return $this->modified_by;
     }
 
     /**
