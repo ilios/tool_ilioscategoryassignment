@@ -98,7 +98,12 @@ class sync_task extends scheduled_task {
     protected function run_sync_job(sync_job $sync_job, ilios_client $ilios_client) {
         $job_title = $sync_job->get_title();
         mtrace("Started sync job '$job_title'.");
-        $course_category = \coursecat::get($sync_job->get_course_category_id());
+        $course_category = \coursecat::get($sync_job->get_course_category_id(), IGNORE_MISSING);
+        if (empty($course_category)) {
+            mtrace('ERROR: Failed to load course category with ID = ' . $sync_job->get_course_category_id());
+
+            return;
+        }
         $ilios_users = $this->get_users_from_ilios($sync_job, $ilios_client);
         mtrace('Retrieved ' . count($ilios_users) . ' Ilios user(s) to sync.');
         $moodle_users = $this->get_moodle_users($ilios_users);
