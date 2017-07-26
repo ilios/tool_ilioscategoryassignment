@@ -77,21 +77,21 @@ class create_sync_job extends moodleform {
 
         $mform->addElement('text', 'title', get_string('title', 'tool_ilioscategoryassignment')); // Add elements to your form
         $mform->setType('title', PARAM_NOTAGS);
-        $mform->addRule('title', null, 'required');
-
+        $mform->addRule('title', null, 'required', null, 'client');
+        $mform->addRule('title', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
         $mform->addElement('select', 'categoryid', get_string('selectcategory', 'tool_ilioscategoryassignment'), $categories);
-        $mform->addRule('categoryid', null, 'required');
+        $mform->addRule('categoryid', null, 'required', null, 'client');
 
         $mform->addElement('select', 'roleid', get_string('selectrole', 'tool_ilioscategoryassignment'), $role_options);
-        $mform->addRule('roleid', null, 'required');
+        $mform->addRule('roleid', null, 'required', null, 'client');
 
         $mform->addElement('select', 'iliosschoolid', get_string('selectiliosschool', 'tool_ilioscategoryassignment'), $ilios_schools);
-        $mform->addRule('iliosschoolid', null, 'required');
+        $mform->addRule('iliosschoolid', null, 'required', null, 'client');
 
         $select = $mform->addElement('select', 'iliosroleid', get_string('selectiliosroles', 'tool_ilioscategoryassignment'), $ilios_roles);
         $select->setMultiple(true);
-        $mform->addRule('iliosroleid', null, 'required');
+        $mform->addRule('iliosroleid', null, 'required', null, 'client');
 
         $this->add_action_buttons(false, get_string('submit'));
     }

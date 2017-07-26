@@ -18,6 +18,7 @@ $string['iliosroles'] = 'Ilios user roles';
 $string['jobenabled'] = 'Enabled sync job "{$a}".';
 $string['jobdeleted'] = 'Deleted sync job "{$a}".';
 $string['jobdisabled'] = 'Disabled sync job "{$a}".';
+$string['newjobcreated'] = 'Created new sync job "{$a}".';
 $string['newsyncjob'] = "New sync job";
 $string['noassignablecategories'] = 'There are currently no course categories that can be used for assignment.';
 $string['noassignableroles'] = 'There are currently no roles that can be used for assignment.';
