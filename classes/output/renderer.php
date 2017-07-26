@@ -70,7 +70,7 @@ class renderer extends plugin_renderer_base {
             $ilios_school_id = $source->get_school_id();
             $ilios_school_title = $this->get_not_found_message($ilios_school_id);
             if (array_key_exists($ilios_school_id, $ilios_schools)) {
-                $ilios_school_title = $ilios_schools[$ilios_school_id]->title;
+                $ilios_school_title = $ilios_schools[$ilios_school_id];
             }
 
             $iliosschoolcell = new \html_table_cell($ilios_school_title);
@@ -78,7 +78,7 @@ class renderer extends plugin_renderer_base {
             $ilios_role_titles = array();
             foreach ($source->get_role_ids() as $role_id) {
                 if (array_key_exists($role_id, $ilios_roles)) {
-                    $ilios_role_titles[] = $ilios_roles[$role_id]->title;
+                    $ilios_role_titles[] = $ilios_roles[$role_id];
                 } else {
                     $ilios_role_titles[] = $this->get_not_found_message($role_id);
                 }

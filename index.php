@@ -77,15 +77,9 @@ if (!empty($jobs)) {
 try {
     $ilios_client = manager::instantiate_ilios_client();
     $ilios_schools = $ilios_client->get('schools');
-    if (!empty($ilios_schools)) {
-        $ilios_school_ids = array_column($ilios_schools, 'id');
-        $ilios_schools = array_combine($ilios_school_ids, $ilios_schools);
-    }
+    $ilios_schools = array_column($ilios_schools, 'title', 'id');
     $ilios_roles = $ilios_client->get('userRoles');
-    if (!empty($ilios_roles)) {
-        $ilios_role_ids = array_column($ilios_roles, 'id');
-        $ilios_roles = array_combine($ilios_role_ids, $ilios_roles);
-    }
+    $ilios_roles = array_column($ilios_roles, 'title', 'id');
 } catch (\Exception $e) {
     echo $renderer->notify_error(get_string('ilioserror', 'tool_ilioscategoryassignment'));
 }
