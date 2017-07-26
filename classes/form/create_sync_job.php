@@ -39,8 +39,19 @@ class create_sync_job extends moodleform {
         $mform = $this->_form;
 
         $categories = \coursecat::make_categories_list();
+        if (empty($categories)) {
+            $warning = $renderer->notify_error(get_string('noassignablecategories', 'tool_ilioscategoryassignment'));
+            $mform->addElement('html', $warning);
+            return;
+        }
 
         $roles = \role_get_names();
+        if (empty($roles)) {
+            $warning = $renderer->notify_error(get_string('noassignableroles', 'tool_ilioscategoryassignment'));
+            $mform->addElement('html', $warning);
+            return;
+        }
+
         $role_options = array();
         foreach ($roles as $role) {
             $role_options[$role->id] = $role->localname;
@@ -59,8 +70,11 @@ class create_sync_job extends moodleform {
                 $ilios_roles = array_column($ilios_roles, 'title', 'id');
             }
         } catch (\Exception $e) {
-            echo $renderer->notify_error(get_string('ilioserror', 'tool_ilioscategoryassignment'));
+            $warning = $renderer->notify_error(get_string('ilioserror', 'tool_ilioscategoryassignment'));
+            $mform->addElement('html', $warning);
+            return;
         }
+
         $mform->addElement('text', 'title', get_string('title', 'tool_ilioscategoryassignment')); // Add elements to your form
         $mform->setType('title', PARAM_NOTAGS);
         $mform->addRule('title', null, 'required');

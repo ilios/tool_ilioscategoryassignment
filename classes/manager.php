@@ -153,6 +153,31 @@ class manager {
     }
 
     /**
+     * @param sync_job $job
+     * @return sync_job
+     */
+    public static function create_job(sync_job $job) {
+        global $DB;
+        $dto = new \stdClass();
+        $dto->title = $job->get_title();
+        $dto->roleid = $job->get_role_id();
+        $dto->coursecatid = $job->get_course_category_id();
+        $dto->enabled = $job->is_enabled();
+        $job_id = $DB->insert_record('tool_ilioscatassignment', $dto);
+        foreach ($job->get_sources() as $source) {
+            $school_id = (int) $source->get_school_id();
+            foreach ($source->get_role_ids() as $role_id) {
+                $dto = new \stdClass();
+                $dto->jobid = $job_id;
+                $dto->roleid = (int) $role_id;
+                $dto->schoolid = $school_id;
+                $DB->insert_record('tool_ilioscatassignment_src', $dto);
+            }
+        }
+        return self::get_sync_job($job_id);
+    }
+
+    /**
      * @param int $job_id
      */
     public static function delete_job($job_id) {

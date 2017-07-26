@@ -38,7 +38,7 @@ class sync_job {
         $this->role_id = $role_id;
         $this->course_category_id = $course_category_id;
         $this->enabled = $enabled;
-         $this->sources = $sources;
+        $this->sources = $sources;
     }
 
     /**

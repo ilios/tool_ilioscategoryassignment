@@ -28,8 +28,8 @@ class renderer extends plugin_renderer_base {
      * @param sync_job[] $sync_jobs
      * @param \coursecat[] $course_categories
      * @param \stdClass[] $roles
-     * @param \stdClass[] $ilios_schools
-     * @param \stdClass[] $ilios_roles
+     * @param string[] $ilios_schools
+     * @param string[] $ilios_roles
      * @return string HTML to output.
      */
     public function sync_jobs_table(array $sync_jobs, array $course_categories, array $roles, array $ilios_schools,
