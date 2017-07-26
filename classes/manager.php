@@ -5,6 +5,7 @@
  *
  * @package tool_ilioscategoryassignment
  */
+
 namespace tool_ilioscategoryassignment;
 
 /* @global $CFG */
@@ -43,7 +44,6 @@ class manager {
                 $accesstoken);
     }
 
-
     /**
      * @param $id
      * @return sync_job|null
@@ -55,6 +55,7 @@ class manager {
 
     /**
      * Loads, caches and returns the configuration for this plugin.
+     *
      * @return \stdClass
      * @see get_config()
      */
@@ -133,7 +134,7 @@ class manager {
         global $DB;
         $table_name = 'tool_ilioscatassignment';
         $job = $DB->get_record($table_name, array('id' => $job_id));
-        if (! empty($job)) {
+        if (!empty($job)) {
             $job->enabled = false;
             $DB->update_record($table_name, $job);
         }
@@ -146,7 +147,7 @@ class manager {
         global $DB;
         $table_name = 'tool_ilioscatassignment';
         $job = $DB->get_record($table_name, array('id' => $job_id));
-        if (! empty($job)) {
+        if (!empty($job)) {
             $job->enabled = true;
             $DB->update_record($table_name, $job);
         }
@@ -197,6 +198,7 @@ class manager {
             return;
         }
         $context = $category->get_context();
-        role_unassign_all(array('component' => 'tool_ilioscategoryassignment', 'roleid' => $job->get_role_id(), 'contextid' => $context->id));
+        role_unassign_all(array('component' => 'tool_ilioscategoryassignment', 'roleid' => $job->get_role_id(),
+                'contextid' => $context->id));
     }
 }
