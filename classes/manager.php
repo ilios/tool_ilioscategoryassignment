@@ -9,6 +9,7 @@
 namespace tool_ilioscategoryassignment;
 
 /* @global $CFG */
+use core\event\course_category_deleted;
 use local_iliosapiclient\ilios_client;
 
 require_once($CFG->libdir . '/coursecatlib.php');
@@ -200,5 +201,19 @@ class manager {
         $context = $category->get_context();
         role_unassign_all(array('component' => 'tool_ilioscategoryassignment', 'roleid' => $job->get_role_id(),
                 'contextid' => $context->id));
+    }
+
+    /**
+     * Event observer for the "course category deleted" event.
+     * Removes any sync jobs and role assignments associated with that category.
+     *
+     * @param \core\event\course_category_deleted $event
+     */
+    public static function course_category_deleted(course_category_deleted $event) {
+        $category  = $event->get_coursecat();
+        $jobs = self::get_sync_jobs(array('coursecatid' => $category->id));
+        foreach ($jobs as $job) {
+            self::delete_job($job->get_id());
+        }
     }
 }
