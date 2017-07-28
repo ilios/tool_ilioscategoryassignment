@@ -33,16 +33,16 @@ class renderer extends plugin_renderer_base {
      * @return string HTML to output.
      */
     public function sync_jobs_table(array $sync_jobs, array $course_categories, array $roles, array $ilios_schools,
-            array $ilios_roles) {
+        array $ilios_roles) {
         global $CFG;
         $table = new \html_table();
         $table->head = array(
-                get_string('title', 'tool_ilioscategoryassignment'),
-                get_string('coursecategory'),
-                get_string('role'),
-                get_string('iliosschool', 'tool_ilioscategoryassignment'),
-                get_string('iliosroles', 'tool_ilioscategoryassignment'),
-                get_string('actions')
+            get_string('title', 'tool_ilioscategoryassignment'),
+            get_string('coursecategory'),
+            get_string('role'),
+            get_string('iliosschool', 'tool_ilioscategoryassignment'),
+            get_string('iliosroles', 'tool_ilioscategoryassignment'),
+            get_string('actions')
         );
         $table->attributes['class'] = 'admintable generaltable';
         $data = array();
@@ -88,33 +88,33 @@ class renderer extends plugin_renderer_base {
             $actions = array();
             if ($job->is_enabled()) {
                 $actions[] = $this->action_icon(
-                        new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
-                                array('job_id' => $job->get_id(), 'action' => 'disable', 'sesskey' => \sesskey())),
-                        new \pix_icon('t/hide', new \lang_string('disable'))
+                    new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
+                        array('job_id' => $job->get_id(), 'action' => 'disable', 'sesskey' => \sesskey())),
+                    new \pix_icon('t/hide', new \lang_string('disable'))
                 );
             } else {
                 $actions[] = $this->action_icon(
-                        new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
-                                array('job_id' => $job->get_id(), 'action' => 'enable', 'sesskey' => \sesskey())),
-                        new \pix_icon('t/show', new \lang_string('enable'))
+                    new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
+                        array('job_id' => $job->get_id(), 'action' => 'enable', 'sesskey' => \sesskey())),
+                    new \pix_icon('t/show', new \lang_string('enable'))
                 );
             }
 
             $actions[] = $this->action_icon(
-                    new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
-                            array('job_id' => $job->get_id(), 'action' => 'delete', 'sesskey' => \sesskey())),
-                    new \pix_icon('t/delete', new \lang_string('delete'))
+                new \moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
+                    array('job_id' => $job->get_id(), 'action' => 'delete', 'sesskey' => \sesskey())),
+                new \pix_icon('t/delete', new \lang_string('delete'))
             );
 
             $actionscell = new \html_table_cell(implode(' ', $actions));
 
             $row = new \html_table_row(array(
-                    $titlecell,
-                    $coursecatcell,
-                    $rolecell,
-                    $iliosschoolcell,
-                    $iliosrolecell,
-                    $actionscell
+                $titlecell,
+                $coursecatcell,
+                $rolecell,
+                $iliosschoolcell,
+                $iliosrolecell,
+                $actionscell
             ));
             $data[] = $row;
         }

@@ -43,19 +43,19 @@ if (in_array($action, array('enable', 'disable', 'delete'))) {
             case 'enable':
                 manager::enable_job($job_id);
                 echo $renderer->notify_success(
-                        get_string('jobenabled', 'tool_ilioscategoryassignment', $job->get_title())
+                    get_string('jobenabled', 'tool_ilioscategoryassignment', $job->get_title())
                 );
                 break;
             case 'disable':
                 manager::disable_job($job_id);
                 echo $renderer->notify_success(
-                        get_string('jobdisabled', 'tool_ilioscategoryassignment', $job->get_title())
+                    get_string('jobdisabled', 'tool_ilioscategoryassignment', $job->get_title())
                 );
                 break;
             case 'delete':
                 manager::delete_job($job_id);
                 echo $renderer->notify_success(
-                        get_string('jobdeleted', 'tool_ilioscategoryassignment', $job->get_title())
+                    get_string('jobdeleted', 'tool_ilioscategoryassignment', $job->get_title())
                 );
         }
     }

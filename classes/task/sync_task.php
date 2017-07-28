@@ -125,27 +125,27 @@ class sync_task extends scheduled_task {
 
         foreach ($sync_job->get_sources() as $source) {
             $filters = array(
-                    'school' => $source->get_school_id(),
-                    'roles' => $source->get_role_ids(),
-                    'enabled' => true
+                'school' => $source->get_school_id(),
+                'roles' => $source->get_role_ids(),
+                'enabled' => true
             );
             try {
                 $records = $ilios_client->get(
-                        'users',
-                        $filters,
-                        null,
-                        5000
+                    'users',
+                    $filters,
+                    null,
+                    5000
 
                 );
             } catch (\Exception $e) {
                 // re-throw exception with a better error message
                 throw new \Exception('Failed to retrieve users from Ilios with the following parameters: ' .
-                        print_r($filters, true), 0, $e);
+                    print_r($filters, true), 0, $e);
             }
 
             foreach ($records as $rec) {
                 if (object_property_exists($rec, 'campusId')
-                        && '' !== trim($rec->campusId)
+                    && '' !== trim($rec->campusId)
                 ) {
                     $ilios_users[] = $rec->campusId;
                 }
@@ -175,7 +175,7 @@ class sync_task extends scheduled_task {
             $id_numbers = array_column($users, 'idnumber');
             $excluded = array_diff($ilios_users, $id_numbers);
             mtrace('WARNING: Skipping non-matching user accounts with the following Ilios campus IDs: '
-                    . implode(', ', $excluded));
+                . implode(', ', $excluded));
         }
 
         return array_column($users, 'id');

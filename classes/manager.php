@@ -40,9 +40,9 @@ class manager {
         $accesstoken->expires = manager::get_config('apikeyexpires');
 
         return new ilios_client(manager::get_config('host_url'),
-                manager::get_config('userid'),
-                manager::get_config('secret'),
-                $accesstoken);
+            manager::get_config('userid'),
+            manager::get_config('secret'),
+            $accesstoken);
     }
 
     /**
@@ -122,7 +122,7 @@ class manager {
                 $job_sources[] = new sync_source($school_id, $role_ids);
             }
             $jobs[] = new sync_job($job_rec->id, $job_rec->title, $job_rec->roleid, $job_rec->coursecatid,
-                    (boolean) $job_rec->enabled, $job_sources);
+                (boolean) $job_rec->enabled, $job_sources);
         }
 
         return $jobs;
@@ -200,7 +200,7 @@ class manager {
         }
         $context = $category->get_context();
         role_unassign_all(array('component' => 'tool_ilioscategoryassignment', 'roleid' => $job->get_role_id(),
-                'contextid' => $context->id));
+            'contextid' => $context->id));
     }
 
     /**
@@ -210,7 +210,7 @@ class manager {
      * @param \core\event\course_category_deleted $event
      */
     public static function course_category_deleted(course_category_deleted $event) {
-        $category  = $event->get_coursecat();
+        $category = $event->get_coursecat();
         $jobs = self::get_sync_jobs(array('coursecatid' => $category->id));
         foreach ($jobs as $job) {
             self::delete_job($job->get_id());

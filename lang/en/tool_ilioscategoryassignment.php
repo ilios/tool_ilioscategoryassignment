@@ -13,7 +13,7 @@ $string['clientconfig_desc'] = "Configure your Ilios API endpoint and credential
 $string['host_url'] = 'Host URL';
 $string['host_url_desc'] = 'Type Ilios server IP address or host URL.';
 $string['ilioserror'] =
-        'An error occurred while accessing Ilios. Please check that Ilios is up and running, and that your connection to Ilios is configured correctly.';
+    'An error occurred while accessing Ilios. Please check that Ilios is up and running, and that your connection to Ilios is configured correctly.';
 $string['iliosschool'] = 'Ilios school';
 $string['iliosroles'] = 'Ilios user roles';
 $string['jobenabled'] = 'Enabled sync job "{$a}".';

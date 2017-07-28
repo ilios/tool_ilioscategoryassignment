@@ -13,5 +13,5 @@ $plugin->component = 'tool_ilioscategoryassignment';
 $plugin->maturity = MATURITY_RC;
 $plugin->release = '1.0.0-RC1';
 $plugin->dependencies = array(
-        'local_iliosapiclient' => 2017071700,
+    'local_iliosapiclient' => 2017071700,
 );
