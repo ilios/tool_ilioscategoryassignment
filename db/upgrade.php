@@ -41,7 +41,7 @@ function xmldb_tool_ilioscategoryassignment_upgrade($oldversion)
             $dbman->add_field($table, $field);
         }
         $DB->execute('UPDATE {tool_ilioscatassignment} t SET t.schoolid = (SELECT schoolid FROM {tool_ilioscatassignment_src} WHERE jobid = t.id ORDER BY id DESC LIMIT 1)');
-        $table = new xmldb_table('tool_ilioscassignment_src');
+        $table = new xmldb_table('tool_ilioscatassignment_src');
         if ($dbman->table_exists($table)) {
             $dbman->drop_table($table);
         }
