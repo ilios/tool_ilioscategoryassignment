@@ -9,18 +9,19 @@ namespace tool_ilioscategoryassignment;
  * @category model
  */
 class sync_job {
-    /** @var  int $id */
+    /** @var int $id */
     protected $id;
-    /** @var  string $title */
+    /** @var string $title */
     protected $title;
-    /** @var  int $role_id */
+    /** @var int $role_id */
     protected $role_id;
-    /** @var  int $course_category_id */
+    /** @var int $course_category_id */
     protected $course_category_id;
-    /** @var  bool $enabled */
+    /** @var bool $enabled */
     protected $enabled;
-    /** @var  sync_source[] $sources */
-    protected $sources;
+    /** @var int $school_id */
+    protected $school_id;
+
 
     /**
      * sync_job constructor.
@@ -30,15 +31,15 @@ class sync_job {
      * @param $role_id
      * @param $course_category_id
      * @param $enabled
-     * @param sync_source[] $sources
+     * @param $school_id
      */
-    public function __construct($id, $title, $role_id, $course_category_id, $enabled, array $sources = array()) {
+    public function __construct($id, $title, $role_id, $course_category_id, $enabled, $school_id) {
         $this->id = $id;
         $this->title = $title;
         $this->role_id = $role_id;
         $this->course_category_id = $course_category_id;
         $this->enabled = $enabled;
-        $this->sources = $sources;
+        $this->school_id = $school_id;
     }
 
     /**
@@ -63,10 +64,10 @@ class sync_job {
     }
 
     /**
-     * @return sync_source[]
+     * @return int
      */
-    public function get_sources() {
-        return $this->sources;
+    public function get_school_id() {
+        return $this->school_id;
     }
 
     /**

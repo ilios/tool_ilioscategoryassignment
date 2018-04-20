@@ -47,7 +47,9 @@ class manager {
 
     /**
      * @param $id
+     *
      * @return sync_job|null
+     * @throws \dml_exception
      */
     public static function get_sync_job($id) {
         $jobs = self::get_sync_jobs(array('id' => $id));
@@ -59,6 +61,7 @@ class manager {
      *
      * @return \stdClass
      * @see get_config()
+     * @throws \dml_exception
      */
     public static function get_plugin_config() {
         static $config = null;
@@ -75,6 +78,7 @@ class manager {
      * @param string $default value if config does not exist yet
      *
      * @return string value or default
+     * @throws \dml_exception
      */
     public static function get_config($name, $default = null) {
         $config = self::get_plugin_config();
@@ -86,6 +90,8 @@ class manager {
      *
      * @param string $name name of config
      * @param string $value string config value, null means delete
+     *
+     * @throws \dml_exception
      */
     public static function set_config($name, $value) {
         $config = self::get_plugin_config();
@@ -99,30 +105,17 @@ class manager {
 
     /**
      * @param array $filters
+     *
      * @return sync_job[]
+     * @throws \dml_exception
      */
     public static function get_sync_jobs(array $filters = array()) {
         global $DB;
         $jobs = array();
         $job_recs = $DB->get_records('tool_ilioscatassignment', $filters);
         foreach ($job_recs as $job_rec) {
-            $src_recs = $DB->get_records('tool_ilioscatassignment_src', array('jobid' => $job_rec->id));
-            $src_map = array();
-            foreach ($src_recs as $src_rec) {
-                if (!array_key_exists($src_rec->schoolid, $src_map)) {
-                    $src_map[$src_rec->schoolid] = array();
-                }
-                if (!in_array($src_rec->roleid, $src_map[$src_rec->schoolid])) {
-                    $src_map[$src_rec->schoolid][] = $src_rec->roleid;
-                }
-            }
-
-            $job_sources = array();
-            foreach ($src_map as $school_id => $role_ids) {
-                $job_sources[] = new sync_source($school_id, $role_ids);
-            }
             $jobs[] = new sync_job($job_rec->id, $job_rec->title, $job_rec->roleid, $job_rec->coursecatid,
-                (boolean) $job_rec->enabled, $job_sources);
+                (boolean) $job_rec->enabled, $job_rec->schoolid);
         }
 
         return $jobs;
@@ -130,6 +123,8 @@ class manager {
 
     /**
      * @param int $job_id
+     *
+     * @throws \dml_exception
      */
     public static function disable_job($job_id) {
         global $DB;
@@ -143,6 +138,8 @@ class manager {
 
     /**
      * @param int $job_id
+     *
+     * @throws \dml_exception
      */
     public static function enable_job($job_id) {
         global $DB;
@@ -156,7 +153,9 @@ class manager {
 
     /**
      * @param sync_job $job
+     *
      * @return sync_job
+     * @throws \dml_exception
      */
     public static function create_job(sync_job $job) {
         global $DB;
@@ -165,22 +164,18 @@ class manager {
         $dto->roleid = $job->get_role_id();
         $dto->coursecatid = $job->get_course_category_id();
         $dto->enabled = $job->is_enabled();
+        $dto->schoolid = $job->get_school_id();
+
         $job_id = $DB->insert_record('tool_ilioscatassignment', $dto);
-        foreach ($job->get_sources() as $source) {
-            $school_id = (int) $source->get_school_id();
-            foreach ($source->get_role_ids() as $role_id) {
-                $dto = new \stdClass();
-                $dto->jobid = $job_id;
-                $dto->roleid = (int) $role_id;
-                $dto->schoolid = $school_id;
-                $DB->insert_record('tool_ilioscatassignment_src', $dto);
-            }
-        }
         return self::get_sync_job($job_id);
     }
 
     /**
      * @param int $job_id
+     *
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public static function delete_job($job_id) {
         global $DB;
@@ -190,7 +185,6 @@ class manager {
         }
 
         // delete the given job
-        $DB->delete_records('tool_ilioscatassignment_src', array('jobid' => $job_id));
         $DB->delete_records('tool_ilioscatassignment', array('id' => $job_id));
 
         // remove any course category role assignments that were managed by the given job
@@ -208,6 +202,10 @@ class manager {
      * Removes any sync jobs and role assignments associated with that category.
      *
      * @param \core\event\course_category_deleted $event
+     *
+     * @throws \coding_exception
+     * @throws \dml_exception
+     * @throws \moodle_exception
      */
     public static function course_category_deleted(course_category_deleted $event) {
         $category = $event->get_coursecat();
