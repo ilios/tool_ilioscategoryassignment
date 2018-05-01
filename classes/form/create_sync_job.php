@@ -58,17 +58,11 @@ class create_sync_job extends moodleform {
             $role_options[$role->id] = $role->localname;
         }
 
-        $ilios_schools = array();
-        $ilios_roles = array();
         try {
             $ilios_client = manager::instantiate_ilios_client();
             $ilios_schools = $ilios_client->get('schools');
             if (!empty($ilios_schools)) {
                 $ilios_schools = array_column($ilios_schools, 'title', 'id');
-            }
-            $ilios_roles = $ilios_client->get('userRoles');
-            if (!empty($ilios_roles)) {
-                $ilios_roles = array_column($ilios_roles, 'title', 'id');
             }
         } catch (\Exception $e) {
             $warning = $renderer->notify_error(get_string('ilioserror', 'tool_ilioscategoryassignment'));
@@ -90,11 +84,6 @@ class create_sync_job extends moodleform {
         $mform->addElement('select', 'iliosschoolid', get_string('selectiliosschool', 'tool_ilioscategoryassignment'),
             $ilios_schools);
         $mform->addRule('iliosschoolid', null, 'required', null, 'client');
-
-        $select = $mform->addElement('select', 'iliosroleid', get_string('selectiliosroles', 'tool_ilioscategoryassignment'),
-            $ilios_roles);
-        $select->setMultiple(true);
-        $mform->addRule('iliosroleid', null, 'required', null, 'client');
 
         $this->add_action_buttons(false, get_string('submit'));
     }

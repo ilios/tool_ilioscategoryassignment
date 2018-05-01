@@ -29,6 +29,8 @@ class sync_task extends scheduled_task {
      * Updates the Ilios API token in the plugin configuration.
      *
      * @param ilios_client $ilios_client
+     *
+     * @throws \dml_exception
      */
     public function save_api_token(ilios_client $ilios_client) {
         $accesstoken = $ilios_client->getAccessToken();
@@ -84,6 +86,7 @@ class sync_task extends scheduled_task {
 
     /**
      * @return sync_job[]
+     * @throws \dml_exception
      */
     protected function get_enabled_sync_jobs() {
         return manager::get_sync_jobs(array('enabled' => true));
@@ -94,6 +97,9 @@ class sync_task extends scheduled_task {
      *
      * @param sync_job $sync_job
      * @param $ilios_client $ilios_client
+     *
+     * @throws \moodle_exception
+     * @throws \Exception
      */
     protected function run_sync_job(sync_job $sync_job, ilios_client $ilios_client) {
         $job_title = $sync_job->get_title();
@@ -123,34 +129,44 @@ class sync_task extends scheduled_task {
     protected function get_users_from_ilios(sync_job $sync_job, ilios_client $ilios_client) {
         $ilios_users = array();
 
-        foreach ($sync_job->get_sources() as $source) {
-            $filters = array(
-                'school' => $source->get_school_id(),
-                'roles' => $source->get_role_ids(),
-                'enabled' => true
+        $filters = array(
+            'school' => $sync_job->get_school_id(),
+            'enabled' => true
+        );
+        try {
+            $records = $ilios_client->get(
+                'users',
+                $filters,
+                null,
+                5000
+
             );
-            try {
-                $records = $ilios_client->get(
-                    'users',
-                    $filters,
-                    null,
-                    5000
+        } catch (\Exception $e) {
+            // re-throw exception with a better error message
+            throw new \Exception('Failed to retrieve users from Ilios with the following parameters: ' .
+                print_r($filters, true), 0, $e);
+        }
 
-                );
-            } catch (\Exception $e) {
-                // re-throw exception with a better error message
-                throw new \Exception('Failed to retrieve users from Ilios with the following parameters: ' .
-                    print_r($filters, true), 0, $e);
-            }
+        // filter out any users that do not fulfill a director or instructor function in ilios.
+        $records = array_filter($records, function(\stdClass $rec) {
+            return ! empty($rec->directedCourses) ||
+                   ! empty($rec->directedPrograms) ||
+                   ! empty($rec->directedSchools) ||
+                   ! empty($rec->instructedLearnerGroups) ||
+                   ! empty($rec->instructedOfferings) ||
+                   ! empty($rec->instructorIlmSessions) ||
+                   ! empty($rec->instructorGroups);
+        });
 
-            foreach ($records as $rec) {
-                if (object_property_exists($rec, 'campusId')
-                    && '' !== trim($rec->campusId)
-                ) {
-                    $ilios_users[] = $rec->campusId;
-                }
+        foreach ($records as $rec) {
+            if (object_property_exists($rec, 'campusId')
+                && '' !== trim($rec->campusId)
+            ) {
+                $ilios_users[] = $rec->campusId;
             }
         }
+
+
         $ilios_users = array_unique($ilios_users);
 
         return $ilios_users;
@@ -162,6 +178,8 @@ class sync_task extends scheduled_task {
      * @param string[] $ilios_users The campus IDs of users retrieved from Ilios.
      *
      * @return int[] A list of Moodle user IDs.
+     * @throws \coding_exception
+     * @throws \dml_exception
      */
     protected function get_moodle_users(array $ilios_users) {
         global $DB;
@@ -188,6 +206,8 @@ class sync_task extends scheduled_task {
      * @param sync_job $sync_job
      * @param \coursecat $course_category
      * @param int[] $user_ids
+     *
+     * @throws \coding_exception
      */
     public function sync_category(sync_job $sync_job, \coursecat $course_category, array $user_ids) {
         $formatted_category_name = $course_category->get_formatted_name();

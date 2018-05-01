@@ -29,11 +29,12 @@ class renderer extends plugin_renderer_base {
      * @param \coursecat[] $course_categories
      * @param \stdClass[] $roles
      * @param string[] $ilios_schools
-     * @param string[] $ilios_roles
+     *
      * @return string HTML to output.
+     * @throws \coding_exception
+     * @throws \moodle_exception
      */
-    public function sync_jobs_table(array $sync_jobs, array $course_categories, array $roles, array $ilios_schools,
-        array $ilios_roles) {
+    public function sync_jobs_table(array $sync_jobs, array $course_categories, array $roles, array $ilios_schools) {
         global $CFG;
         $table = new \html_table();
         $table->head = array(
@@ -41,7 +42,6 @@ class renderer extends plugin_renderer_base {
             get_string('coursecategory'),
             get_string('role'),
             get_string('iliosschool', 'tool_ilioscategoryassignment'),
-            get_string('iliosroles', 'tool_ilioscategoryassignment'),
             get_string('actions')
         );
         $table->attributes['class'] = 'admintable generaltable';
@@ -65,25 +65,13 @@ class renderer extends plugin_renderer_base {
             }
             $rolecell = new \html_table_cell($role_title);
 
-            $source = $job->get_sources()[0]; // there should be exactly one.
-
-            $ilios_school_id = $source->get_school_id();
+            $ilios_school_id = $job->get_school_id();
             $ilios_school_title = $this->get_not_found_message($ilios_school_id);
             if (array_key_exists($ilios_school_id, $ilios_schools)) {
                 $ilios_school_title = $ilios_schools[$ilios_school_id];
             }
 
             $iliosschoolcell = new \html_table_cell($ilios_school_title);
-
-            $ilios_role_titles = array();
-            foreach ($source->get_role_ids() as $role_id) {
-                if (array_key_exists($role_id, $ilios_roles)) {
-                    $ilios_role_titles[] = $ilios_roles[$role_id];
-                } else {
-                    $ilios_role_titles[] = $this->get_not_found_message($role_id);
-                }
-            }
-            $iliosrolecell = new \html_table_cell(implode(', ', $ilios_role_titles));
 
             $actions = array();
             if ($job->is_enabled()) {
@@ -113,7 +101,6 @@ class renderer extends plugin_renderer_base {
                 $coursecatcell,
                 $rolecell,
                 $iliosschoolcell,
-                $iliosrolecell,
                 $actionscell
             ));
             $data[] = $row;

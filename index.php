@@ -66,7 +66,6 @@ $jobs = manager::get_sync_jobs();
 $course_categories = array();
 $roles = array();
 $ilios_schools = array();
-$ilios_roles = array();
 
 if (!empty($jobs)) {
     $course_category_ids = array_column($jobs, 'course_category_id');
@@ -78,15 +77,13 @@ try {
     $ilios_client = manager::instantiate_ilios_client();
     $ilios_schools = $ilios_client->get('schools');
     $ilios_schools = array_column($ilios_schools, 'title', 'id');
-    $ilios_roles = $ilios_client->get('userRoles');
-    $ilios_roles = array_column($ilios_roles, 'title', 'id');
 } catch (\Exception $e) {
     echo $renderer->notify_error(get_string('ilioserror', 'tool_ilioscategoryassignment'));
 }
 
 $title = get_string('syncjobs', 'tool_ilioscategoryassignment') . ' (' . count($jobs) . ')';
 echo $OUTPUT->heading($title);
-echo $renderer->sync_jobs_table($jobs, $course_categories, $roles, $ilios_schools, $ilios_roles);
+echo $renderer->sync_jobs_table($jobs, $course_categories, $roles, $ilios_schools);
 echo $OUTPUT->footer();
 
 

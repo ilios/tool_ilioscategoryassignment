@@ -40,7 +40,6 @@ $data = $mform->get_data();
 if ($data) {
     $sync_sources = array();
     $ilios_school_id = (int) $data->iliosschoolid;
-    $sync_sources[] = new sync_source($ilios_school_id, $data->iliosroleid);
 
     $sync_job = new sync_job(
         null,
@@ -48,7 +47,7 @@ if ($data) {
         (int) $data->roleid,
         (int) $data->categoryid,
         true,
-        $sync_sources
+        $ilios_school_id
     );
     $sync_job = manager::create_job($sync_job);
     $redirect_url = new moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php");
