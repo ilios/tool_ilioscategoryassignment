@@ -9,12 +9,12 @@
 namespace tool_ilioscategoryassignment\task;
 
 use core\task\scheduled_task;
+use core_course_category;
 use local_iliosapiclient\ilios_client;
 use tool_ilioscategoryassignment\manager;
 use tool_ilioscategoryassignment\sync_job;
 
 /* @global $CFG */
-require_once($CFG->libdir . '/coursecatlib.php');
 require_once($CFG->libdir . '/accesslib.php');
 
 /**
@@ -104,7 +104,7 @@ class sync_task extends scheduled_task {
     protected function run_sync_job(sync_job $sync_job, ilios_client $ilios_client) {
         $job_title = $sync_job->get_title();
         mtrace("Started sync job '$job_title'.");
-        $course_category = \coursecat::get($sync_job->get_course_category_id(), IGNORE_MISSING);
+        $course_category = core_course_category::get($sync_job->get_course_category_id(), IGNORE_MISSING);
         if (empty($course_category)) {
             mtrace('ERROR: Failed to load course category with ID = ' . $sync_job->get_course_category_id());
 
@@ -204,12 +204,12 @@ class sync_task extends scheduled_task {
      * Updates users role assignment in a given category.
      *
      * @param sync_job $sync_job
-     * @param \coursecat $course_category
+     * @param core_course_category $course_category
      * @param int[] $user_ids
      *
      * @throws \coding_exception
      */
-    public function sync_category(sync_job $sync_job, \coursecat $course_category, array $user_ids) {
+    public function sync_category(sync_job $sync_job, core_course_category $course_category, array $user_ids) {
         $formatted_category_name = $course_category->get_formatted_name();
         mtrace("Started syncing course category '{$formatted_category_name}'.");
         $role = new \stdClass();
