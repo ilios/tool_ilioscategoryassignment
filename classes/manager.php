@@ -10,9 +10,9 @@ namespace tool_ilioscategoryassignment;
 
 /* @global $CFG */
 use core\event\course_category_deleted;
+use core_course_category;
 use local_iliosapiclient\ilios_client;
 
-require_once($CFG->libdir . '/coursecatlib.php');
 require_once($CFG->libdir . '/accesslib.php');
 
 /**
@@ -188,7 +188,7 @@ class manager {
         $DB->delete_records('tool_ilioscatassignment', array('id' => $job_id));
 
         // remove any course category role assignments that were managed by the given job
-        $category = \coursecat::get($job->get_course_category_id(), IGNORE_MISSING);
+        $category = core_course_category::get($job->get_course_category_id(), IGNORE_MISSING);
         if (empty($category)) {
             return;
         }
