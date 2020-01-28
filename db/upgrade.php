@@ -47,4 +47,6 @@ function xmldb_tool_ilioscategoryassignment_upgrade($oldversion)
         }
         upgrade_plugin_savepoint(true, 2018041100, 'tool', 'ilioscategoryassignment');
     }
+    
+    return true;
 }
