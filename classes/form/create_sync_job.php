@@ -10,13 +10,13 @@ namespace tool_ilioscategoryassignment\form;
 
 defined('MOODLE_INTERNAL') || die();
 
+use core_course_category;
 use moodleform;
 use tool_ilioscategoryassignment\manager;
 use tool_ilioscategoryassignment\output\renderer;
 
 /* @global $CFG */
 require_once($CFG->libdir . '/accesslib.php');
-require_once($CFG->libdir . '/coursecatlib.php');
 require_once($CFG->libdir . '/formslib.php');
 
 /**
@@ -39,7 +39,7 @@ class create_sync_job extends moodleform {
 
         $mform = $this->_form;
 
-        $categories = \coursecat::make_categories_list();
+        $categories = core_course_category::make_categories_list();
         if (empty($categories)) {
             $warning = $renderer->notify_error(get_string('noassignablecategories', 'tool_ilioscategoryassignment'));
             $mform->addElement('html', $warning);
