@@ -32,6 +32,7 @@ $string['selectcategory'] = 'Select category';
 $string['selectiliosschool'] = 'Select Ilios school';
 $string['selectrole'] = 'Select role';
 $string['syncjobs'] = 'Sync jobs';
+$string['syncjobscount'] = 'Sync jobs ({$a})';
 $string['taskname'] = 'Sync category role assignments against Ilios';
 $string['title'] = 'Title';
 $string['userid'] = 'Ilios user ID';

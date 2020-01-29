@@ -94,15 +94,11 @@ try {
     $ilios_client = manager::instantiate_ilios_client();
     $ilios_schools = $ilios_client->get('schools');
     $ilios_schools = array_column($ilios_schools, 'title', 'id');
-} catch (\Exception $e) {
+} catch (Exception $e) {
     echo $renderer->notify_error(get_string('ilioserror', 'tool_ilioscategoryassignment'));
 }
 
 echo $OUTPUT->header();
-$title = get_string('syncjobs', 'tool_ilioscategoryassignment') . ' (' . count($jobs) . ')';
-echo $OUTPUT->heading($title);
+echo $OUTPUT->heading(get_string('syncjobscount', 'tool_ilioscategoryassignment', count($jobs)));
 echo $renderer->sync_jobs_table($jobs, $course_categories, $roles, $ilios_schools);
 echo $OUTPUT->footer();
-
-
-
