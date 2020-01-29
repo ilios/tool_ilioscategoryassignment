@@ -69,7 +69,7 @@ $ilios_schools = array();
 
 if (!empty($jobs)) {
     $course_category_ids = array_column($jobs, 'course_category_id');
-    $course_categories = \coursecat::get_many($course_category_ids);
+    $course_categories = \core_course_category::get_many($course_category_ids);
     $roles = \role_get_names();
 }
 

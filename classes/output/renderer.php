@@ -26,7 +26,7 @@ class renderer extends plugin_renderer_base {
      * Renders a table displaying all configured sync jobs.
      *
      * @param sync_job[] $sync_jobs
-     * @param \coursecat[] $course_categories
+     * @param \core_course_category[] $course_categories
      * @param \stdClass[] $roles
      * @param string[] $ilios_schools
      *
