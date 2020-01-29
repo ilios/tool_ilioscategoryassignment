@@ -7,7 +7,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2020012800;
+$plugin->version = 2020012900;
 $plugin->requires = 2016112900;
 $plugin->component = 'tool_ilioscategoryassignment';
 $plugin->maturity = MATURITY_STABLE;
