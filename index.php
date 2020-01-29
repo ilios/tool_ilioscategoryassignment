@@ -60,8 +60,25 @@ if (in_array($action, array('enable', 'disable', 'delete'))) {
                 );
                 $deletebutton = new single_button($deleteurl, get_string('delete'), 'post');
 
+                $a = new stdClass();
+                $a->jobtitle = $job->get_title();
+
+                $roleid = $job->get_role_id();
+                $roles = role_get_names();
+                $a->roletitle = get_string('notfound', 'tool_ilioscategoryassignment', $roleid);
+                if (array_key_exists($roleid, $roles)) {
+                    $a->roletitle = $roles[$roleid]->localname;
+                }
+
+                $coursecatid = $job->get_course_category_id();
+                $coursecat = core_course_category::get($coursecatid, IGNORE_MISSING);
+                $a->coursecattitle = get_string('notfound', 'tool_ilioscategoryassignment', $coursecatid);
+                if (! empty($coursecat)) {
+                    $a->coursecattitle = $coursecat->get_nested_name(false);
+                }
+
                 echo $OUTPUT->confirm(
-                    get_string('deletejobconfirm', 'tool_ilioscategoryassignment', $job->get_title()),
+                    get_string('deletejobconfirm','tool_ilioscategoryassignment', $a),
                     $deletebutton,
                     $returnurl
                 );
@@ -86,8 +103,8 @@ $ilios_schools = array();
 
 if (!empty($jobs)) {
     $course_category_ids = array_column($jobs, 'course_category_id');
-    $course_categories = \core_course_category::get_many($course_category_ids);
-    $roles = \role_get_names();
+    $course_categories = core_course_category::get_many($course_category_ids);
+    $roles = role_get_names();
 }
 
 try {

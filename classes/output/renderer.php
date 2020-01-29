@@ -112,13 +112,10 @@ class renderer extends plugin_renderer_base {
     /**
      * @param int $id
      * @return string
+     * @throws \coding_exception
      */
     protected function get_not_found_message($id) {
-        static $not_found = null;
-        if (!isset($not_found)) {
-            $not_found = get_string('notfound', 'tool_ilioscategoryassignment');
-        }
-        return "[[ ${not_found} (id = ${id}) ]]";
+        return get_string('notfound', 'tool_ilioscategoryassignment', $id);
     }
 
     /**
