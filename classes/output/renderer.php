@@ -54,7 +54,7 @@ class renderer extends plugin_renderer_base {
             $course_category_id = $job->get_course_category_id();
             $course_title = $this->get_not_found_message($course_category_id);
             if (!empty($course_categories[$course_category_id])) {
-                $course_title = $course_categories[$course_category_id]->get_formatted_name();
+                $course_title = $course_categories[$course_category_id]->get_nested_name();
             }
             $coursecatcell = new \html_table_cell($course_title);
 
