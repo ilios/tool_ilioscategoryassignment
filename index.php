@@ -44,15 +44,12 @@ if (in_array($action, array('enable', 'disable', 'delete'))) {
     if (!empty($job)) {
         if ('enable' === $action && confirm_sesskey()) {
             manager::enable_job($job_id);
-            echo $renderer->notify_success(
-                get_string('jobenabled', 'tool_ilioscategoryassignment', $job->get_title())
-            );
+            $returnmsg = get_string('jobenabled', 'tool_ilioscategoryassignment', $job->get_title());
+            redirect($returnurl, $returnmsg, null, notification::NOTIFY_SUCCESS);
         } elseif ('disable' === $action && confirm_sesskey()) {
             manager::disable_job($job_id);
-            echo $renderer->notify_success(
-                get_string('jobdisabled', 'tool_ilioscategoryassignment', $job->get_title())
-            );
-
+            $returnmsg = get_string('jobdisabled', 'tool_ilioscategoryassignment', $job->get_title());
+            redirect($returnurl, $returnmsg, null, notification::NOTIFY_SUCCESS);
         } elseif ('delete' === $action && confirm_sesskey())  {
             if ($confirm !== md5($action)) {
                 echo $OUTPUT->header();
