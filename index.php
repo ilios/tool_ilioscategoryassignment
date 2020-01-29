@@ -6,6 +6,7 @@
  * @package    tool_ilioscategoryassignment
  */
 
+use core\output\notification;
 use tool_ilioscategoryassignment\manager;
 use tool_ilioscategoryassignment\output\renderer;
 
@@ -19,9 +20,14 @@ require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/tablelib.php');
 
 $action = optional_param('action', 'list', PARAM_ALPHA);
+$confirm = optional_param('confirm', '', PARAM_ALPHANUM);
+
+$returnurl = new moodle_url('/admin/tool/ilioscategoryassignment/index.php');
 
 /* @var moodle_page $PAGE */
 /* @var renderer $renderer */
+/* @var core_renderer $OUTPUT */
+
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url('/admin/tool/ilioscategoryassignment/index.php');
 $PAGE->set_pagelayout('admin');
@@ -30,9 +36,6 @@ $PAGE->set_title($strheading);
 $PAGE->set_heading($strheading);
 
 $renderer = $PAGE->get_renderer('tool_ilioscategoryassignment');
-
-/* @var core_renderer $OUTPUT */
-echo $OUTPUT->header();
 
 if (in_array($action, array('enable', 'disable', 'delete'))) {
     require_sesskey();
@@ -49,11 +52,31 @@ if (in_array($action, array('enable', 'disable', 'delete'))) {
             echo $renderer->notify_success(
                 get_string('jobdisabled', 'tool_ilioscategoryassignment', $job->get_title())
             );
+
         } elseif ('delete' === $action && confirm_sesskey())  {
-            manager::delete_job($job_id);
-            echo $renderer->notify_success(
-                get_string('jobdeleted', 'tool_ilioscategoryassignment', $job->get_title())
-            );
+            if ($confirm !== md5($action)) {
+                echo $OUTPUT->header();
+                echo $OUTPUT->heading(get_string('deletejob', 'tool_ilioscategoryassignment'));
+                $deleteurl = new moodle_url(
+                    $returnurl,
+                    array('action' => $action, 'job_id' => $job->get_id(), 'confirm' => md5($action), 'sesskey' => sesskey())
+                );
+                $deletebutton = new single_button($deleteurl, get_string('delete'), 'post');
+
+                echo $OUTPUT->confirm(
+                    get_string('deletejobconfirm', 'tool_ilioscategoryassignment', $job->get_title()),
+                    $deletebutton,
+                    $returnurl
+                );
+                echo $OUTPUT->footer();
+                die;
+            } elseif (data_submitted()) {
+                manager::delete_job($job_id);
+                $returnmsg = get_string('jobdeleted', 'tool_ilioscategoryassignment', $job->get_title());
+                redirect($returnurl, $returnmsg, null, notification::NOTIFY_SUCCESS);
+
+            }
+
         }
     }
 }
@@ -78,6 +101,7 @@ try {
     echo $renderer->notify_error(get_string('ilioserror', 'tool_ilioscategoryassignment'));
 }
 
+echo $OUTPUT->header();
 $title = get_string('syncjobs', 'tool_ilioscategoryassignment') . ' (' . count($jobs) . ')';
 echo $OUTPUT->heading($title);
 echo $renderer->sync_jobs_table($jobs, $course_categories, $roles, $ilios_schools);
