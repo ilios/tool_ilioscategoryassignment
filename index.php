@@ -39,24 +39,21 @@ if (in_array($action, array('enable', 'disable', 'delete'))) {
     $job_id = required_param('job_id', PARAM_INT);
     $job = manager::get_sync_job($job_id);
     if (!empty($job)) {
-        switch ($action) {
-            case 'enable':
-                manager::enable_job($job_id);
-                echo $renderer->notify_success(
-                    get_string('jobenabled', 'tool_ilioscategoryassignment', $job->get_title())
-                );
-                break;
-            case 'disable':
-                manager::disable_job($job_id);
-                echo $renderer->notify_success(
-                    get_string('jobdisabled', 'tool_ilioscategoryassignment', $job->get_title())
-                );
-                break;
-            case 'delete':
-                manager::delete_job($job_id);
-                echo $renderer->notify_success(
-                    get_string('jobdeleted', 'tool_ilioscategoryassignment', $job->get_title())
-                );
+        if ('enable' === $action && confirm_sesskey()) {
+            manager::enable_job($job_id);
+            echo $renderer->notify_success(
+                get_string('jobenabled', 'tool_ilioscategoryassignment', $job->get_title())
+            );
+        } elseif ('disable' === $action && confirm_sesskey()) {
+            manager::disable_job($job_id);
+            echo $renderer->notify_success(
+                get_string('jobdisabled', 'tool_ilioscategoryassignment', $job->get_title())
+            );
+        } elseif ('delete' === $action && confirm_sesskey())  {
+            manager::delete_job($job_id);
+            echo $renderer->notify_success(
+                get_string('jobdeleted', 'tool_ilioscategoryassignment', $job->get_title())
+            );
         }
     }
 }
