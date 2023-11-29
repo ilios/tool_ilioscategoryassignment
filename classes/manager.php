@@ -11,6 +11,7 @@ namespace tool_ilioscategoryassignment;
 /* @global $CFG */
 use core\event\course_category_deleted;
 use core_course_category;
+use curl;
 use local_iliosapiclient\ilios_client;
 
 require_once($CFG->libdir . '/accesslib.php');
@@ -34,15 +35,8 @@ class manager {
      * @return ilios_client
      * @throws \moodle_exception
      */
-    public static function instantiate_ilios_client() {
-        $accesstoken = new \stdClass();
-        $accesstoken->token = manager::get_config('apikey');
-        $accesstoken->expires = manager::get_config('apikeyexpires');
-
-        return new ilios_client(manager::get_config('host_url'),
-            manager::get_config('userid'),
-            manager::get_config('secret'),
-            $accesstoken);
+    public static function instantiate_ilios_client(): ilios_client {
+        return new ilios_client(manager::get_config('host_url', ''), new curl());
     }
 
     /**
