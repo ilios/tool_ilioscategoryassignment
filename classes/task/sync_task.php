@@ -26,22 +26,6 @@ require_once($CFG->libdir . '/accesslib.php');
 class sync_task extends scheduled_task {
 
     /**
-     * Updates the Ilios API token in the plugin configuration.
-     *
-     * @param ilios_client $ilios_client
-     *
-     * @throws \dml_exception
-     */
-    public function save_api_token(ilios_client $ilios_client) {
-        $accesstoken = $ilios_client->getAccessToken();
-        $apikey = manager::get_config('apikey');
-        if (!empty($accesstoken) && ($apikey !== $accesstoken->token)) {
-            manager::set_config('apikey', $accesstoken->token);
-            manager::set_config('apikeyexpires', $accesstoken->expires);
-        }
-    }
-
-    /**
      * @inheritdoc
      */
     public function get_name() {
@@ -64,7 +48,6 @@ class sync_task extends scheduled_task {
             return;
         }
 
-        $ilios_client = null;
         try {
             $ilios_client = manager::instantiate_ilios_client();
         } catch (\Exception $e) {
@@ -72,14 +55,12 @@ class sync_task extends scheduled_task {
             throw new \Exception('ERROR: Failed to instantiate Ilios client.' . 0, $e);
         }
 
+        $access_token = manager::get_config('apikey', '');
+
         // run enabled each sync job
         foreach ($sync_jobs as $sync_job) {
-            $this->run_sync_job($sync_job, $ilios_client);
+            $this->run_sync_job($sync_job, $access_token, $ilios_client);
         }
-
-        // cleanup phase.
-        // store the API token in the plugin's configuration.
-        $this->save_api_token($ilios_client);
 
         mtrace('Finished Ilios Category Assignment sync job.');
     }
@@ -96,12 +77,13 @@ class sync_task extends scheduled_task {
      * Performs a given sync job.
      *
      * @param sync_job $sync_job
+     * @param string $access_token
      * @param $ilios_client $ilios_client
      *
      * @throws \moodle_exception
      * @throws \Exception
      */
-    protected function run_sync_job(sync_job $sync_job, ilios_client $ilios_client) {
+    protected function run_sync_job(sync_job $sync_job, string $access_token, ilios_client $ilios_client) {
         $job_title = $sync_job->get_title();
         mtrace("Started sync job '$job_title'.");
         $course_category = core_course_category::get($sync_job->get_course_category_id(), IGNORE_MISSING);
@@ -110,7 +92,7 @@ class sync_task extends scheduled_task {
 
             return;
         }
-        $ilios_users = $this->get_users_from_ilios($sync_job, $ilios_client);
+        $ilios_users = $this->get_users_from_ilios($sync_job, $access_token,  $ilios_client);
         mtrace('Retrieved ' . count($ilios_users) . ' Ilios user(s) to sync.');
         $moodle_users = $this->get_moodle_users($ilios_users);
         $this->sync_category($sync_job, $course_category, $moodle_users);
@@ -118,15 +100,16 @@ class sync_task extends scheduled_task {
     }
 
     /**
-     * Retrieves a list of user campus IDs from Ilios qualifiying for the given sync job.
+     * Retrieves a list of user campus IDs from Ilios qualifying for the given sync job.
      *
      * @param sync_job $sync_job
+     * @param string $access_token
      * @param ilios_client $ilios_client
      *
      * @return string[] A list of campus IDs.
      * @throws \Exception
      */
-    protected function get_users_from_ilios(sync_job $sync_job, ilios_client $ilios_client) {
+    protected function get_users_from_ilios(sync_job $sync_job, string $access_token, ilios_client $ilios_client) {
         $ilios_users = array();
 
         $filters = array(
@@ -135,6 +118,7 @@ class sync_task extends scheduled_task {
         );
         try {
             $records = $ilios_client->get(
+                $access_token,
                 'users',
                 $filters,
                 null,

@@ -49,12 +49,6 @@ if ($hassiteconfig) {
         $settings->add(new admin_setting_configtext('tool_ilioscategoryassignment/apikey',
             get_string('apikey', 'tool_ilioscategoryassignment'),
             get_string('apikey_desc', 'tool_ilioscategoryassignment'), ''));
-        $settings->add(new admin_setting_configtext('tool_ilioscategoryassignment/userid',
-            get_string('userid', 'tool_ilioscategoryassignment'),
-            get_string('userid_desc', 'tool_ilioscategoryassignment'), ''));
-        $settings->add(new admin_setting_configpasswordunmask('tool_ilioscategoryassignment/secret',
-            get_string('secret', 'tool_ilioscategoryassignment'),
-            get_string('secret_desc', 'tool_ilioscategoryassignment'), ''));
     }
 
     $ADMIN->add('ilioscategoryassignment', $settings);

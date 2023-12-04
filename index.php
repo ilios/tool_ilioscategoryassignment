@@ -108,8 +108,9 @@ if (!empty($jobs)) {
 }
 
 try {
+    $access_token = manager::get_config('apikey', '');
     $ilios_client = manager::instantiate_ilios_client();
-    $ilios_schools = $ilios_client->get('schools');
+    $ilios_schools = $ilios_client->get($access_token, 'schools');
     $ilios_schools = array_column($ilios_schools, 'title', 'id');
 } catch (Exception $e) {
     echo $renderer->notify_error(get_string('ilioserror', 'tool_ilioscategoryassignment'));
