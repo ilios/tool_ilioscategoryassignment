@@ -1,16 +1,18 @@
 <?php
 /**
- * Ilios category assignment tool.
+ * Ilios category assignment tool - version file.
  *
  * @package tool_ilioscategoryassignment
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2023112900;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires  = 2022111800;        // Requires this Moodle version
-$plugin->component = 'tool_ilioscategoryassignment';
+$plugin->version   = 2024032200;       // The current plugin version (Date: YYYYMMDDXX)
+$plugin->requires  = 2023100400;       // Requires this Moodle version
+$plugin->component = 'tool_ilioscategoryassignment';     // Full name of the plugin (used for diagnostics)
+$plugin->release = 'v4.3';
+$plugin->supported = [403, 403];
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = array(
-    'local_iliosapiclient' => 2023112200,
+    'local_iliosapiclient' => 2024032200,
 );
