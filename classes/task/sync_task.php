@@ -42,24 +42,24 @@ class sync_task extends scheduled_task {
         raise_memory_limit(MEMORY_HUGE);
 
         mtrace('Started Ilios Category Assignment sync job.');
-        $sync_jobs = $this->get_enabled_sync_jobs();
-        if (empty($sync_jobs)) {
+        $syncjobs = $this->get_enabled_sync_jobs();
+        if (empty($syncjobs)) {
             mtrace('No sync jobs enabled.');
             return;
         }
 
         try {
-            $ilios_client = manager::instantiate_ilios_client();
+            $iliosclient = manager::instantiate_ilios_client();
         } catch (\Exception $e) {
             // re-throw exception
             throw new \Exception('ERROR: Failed to instantiate Ilios client.' . 0, $e);
         }
 
-        $access_token = manager::get_config('apikey', '');
+        $accesstoken = manager::get_config('apikey', '');
 
         // run enabled each sync job
-        foreach ($sync_jobs as $sync_job) {
-            $this->run_sync_job($sync_job, $access_token, $ilios_client);
+        foreach ($syncjobs as $syncjob) {
+            $this->run_sync_job($syncjob, $accesstoken, $iliosclient);
         }
 
         mtrace('Finished Ilios Category Assignment sync job.');
@@ -70,7 +70,7 @@ class sync_task extends scheduled_task {
      * @throws \dml_exception
      */
     protected function get_enabled_sync_jobs() {
-        return manager::get_sync_jobs(array('enabled' => true));
+        return manager::get_sync_jobs(['enabled' => true]);
     }
 
     /**
@@ -83,20 +83,20 @@ class sync_task extends scheduled_task {
      * @throws \moodle_exception
      * @throws \Exception
      */
-    protected function run_sync_job(sync_job $sync_job, string $access_token, ilios_client $ilios_client) {
-        $job_title = $sync_job->get_title();
-        mtrace("Started sync job '$job_title'.");
-        $course_category = core_course_category::get($sync_job->get_course_category_id(), IGNORE_MISSING);
-        if (empty($course_category)) {
-            mtrace('ERROR: Failed to load course category with ID = ' . $sync_job->get_course_category_id());
+    protected function run_sync_job(sync_job $syncjob, string $accesstoken, ilios_client $iliosclient) {
+        $jobtitle = $syncjob->get_title();
+        mtrace("Started sync job '$jobtitle'.");
+        $coursecategory = core_course_category::get($syncjob->get_course_category_id(), IGNORE_MISSING);
+        if (empty($coursecategory)) {
+            mtrace('ERROR: Failed to load course category with ID = ' . $syncjob->get_course_category_id());
 
             return;
         }
-        $ilios_users = $this->get_users_from_ilios($sync_job, $access_token,  $ilios_client);
-        mtrace('Retrieved ' . count($ilios_users) . ' Ilios user(s) to sync.');
-        $moodle_users = $this->get_moodle_users($ilios_users);
-        $this->sync_category($sync_job, $course_category, $moodle_users);
-        mtrace("Finished sync job '$job_title'.");
+        $iliosusers = $this->get_users_from_ilios($syncjob, $accesstoken,  $iliosclient);
+        mtrace('Retrieved ' . count($iliosusers) . ' Ilios user(s) to sync.');
+        $moodleusers = $this->get_moodle_users($iliosusers);
+        $this->sync_category($syncjob, $coursecategory, $moodleusers);
+        mtrace("Finished sync job '$jobtitle'.");
     }
 
     /**
@@ -109,16 +109,16 @@ class sync_task extends scheduled_task {
      * @return string[] A list of campus IDs.
      * @throws \Exception
      */
-    protected function get_users_from_ilios(sync_job $sync_job, string $access_token, ilios_client $ilios_client) {
-        $ilios_users = array();
+    protected function get_users_from_ilios(sync_job $syncjob, string $accesstoken, ilios_client $iliosclient) {
+        $iliosusers = [];
 
-        $filters = array(
-            'school' => $sync_job->get_school_id(),
-            'enabled' => true
-        );
+        $filters = [
+            'school' => $syncjob->get_school_id(),
+            'enabled' => true,
+        ];
         try {
-            $records = $ilios_client->get(
-                $access_token,
+            $records = $iliosclient->get(
+                $accesstoken,
                 'users',
                 $filters,
                 null,
@@ -146,14 +146,13 @@ class sync_task extends scheduled_task {
             if (object_property_exists($rec, 'campusId')
                 && '' !== trim($rec->campusId)
             ) {
-                $ilios_users[] = $rec->campusId;
+                $iliosusers[] = $rec->campusId;
             }
         }
 
+        $iliosusers = array_unique($iliosusers);
 
-        $ilios_users = array_unique($ilios_users);
-
-        return $ilios_users;
+        return $iliosusers;
     }
 
     /**
@@ -165,17 +164,17 @@ class sync_task extends scheduled_task {
      * @throws \coding_exception
      * @throws \dml_exception
      */
-    protected function get_moodle_users(array $ilios_users) {
+    protected function get_moodle_users(array $iliosusers) {
         global $DB;
-        if (empty($ilios_users)) {
-            return array();
+        if (empty($iliosusers)) {
+            return [];
         }
-        list($insql, $params) = $DB->get_in_or_equal($ilios_users);
+        list($insql, $params) = $DB->get_in_or_equal($iliosusers);
         $sql = "SELECT * FROM {user} WHERE idnumber $insql";
         $users = $DB->get_records_sql($sql, $params);
-        if (count($users) < count($ilios_users)) {
-            $id_numbers = array_column($users, 'idnumber');
-            $excluded = array_diff($ilios_users, $id_numbers);
+        if (count($users) < count($iliosusers)) {
+            $idnumbers = array_column($users, 'idnumber');
+            $excluded = array_diff($iliosusers, $idnumbers);
             mtrace('WARNING: Skipping non-matching user accounts with the following Ilios campus IDs: '
                 . implode(', ', $excluded));
         }
@@ -193,65 +192,65 @@ class sync_task extends scheduled_task {
      *
      * @throws \coding_exception
      */
-    public function sync_category(sync_job $sync_job, core_course_category $course_category, array $user_ids) {
-        $formatted_category_name = $course_category->get_formatted_name();
-        mtrace("Started syncing course category '{$formatted_category_name}'.");
+    public function sync_category(sync_job $syncjob, core_course_category $coursecategory, array $userids) {
+        $formattedcategoryname = $coursecategory->get_formatted_name();
+        mtrace("Started syncing course category '{$formattedcategoryname}'.");
         $role = new \stdClass();
-        $role->id = $sync_job->get_role_id();
-        $ctx = $course_category->get_context();
-        $role_assignments = get_users_from_role_on_context($role, $ctx);
+        $role->id = $syncjob->get_role_id();
+        $ctx = $coursecategory->get_context();
+        $roleassignments = get_users_from_role_on_context($role, $ctx);
 
-        $all_assigned_users = array();
-        if (!empty($role_assignments)) {
-            $all_assigned_users = array_column($role_assignments, 'userid');
+        $allassignedusers = [];
+        if (!empty($roleassignments)) {
+            $allassignedusers = array_column($roleassignments, 'userid');
         }
 
         // filter out any role assignments that weren't made by this plugin
-        $role_assignments = array_values(array_filter($role_assignments, function($role) {
+        $roleassignments = array_values(array_filter($roleassignments, function($role) {
             return $role->component === 'tool_ilioscategoryassignment';
         }));
 
-        $assigned_users = array();
-        if (!empty($role_assignments)) {
-            $assigned_users = array_column($role_assignments, 'userid');
+        $assignedusers = [];
+        if (!empty($roleassignments)) {
+            $assignedusers = array_column($roleassignments, 'userid');
         }
 
-        $out_of_band_assignments = array_diff($all_assigned_users, $assigned_users);
-        $add_users = array_diff($user_ids, $assigned_users);
-        $remove_users = array_diff($assigned_users, $user_ids);
+        $outofbandassignments = array_diff($allassignedusers, $assignedusers);
+        $addusers = array_diff($userids, $assignedusers);
+        $removeusers = array_diff($assignedusers, $userids);
 
-        $add_users_total = count($add_users);
-        $remove_users_total = count($remove_users);
+        $adduserstotal = count($addusers);
+        $removeuserstotal = count($removeusers);
 
-        if (!$add_users_total && !$remove_users_total) {
+        if (!$adduserstotal && !$removeuserstotal) {
             mtrace('No user assignment/un-assignment necessary.');
         }
 
-        $assignment_counter = 0;
-        if ($add_users_total) {
-            foreach ($add_users as $user_id) {
+        $assignmentcounter = 0;
+        if ($adduserstotal) {
+            foreach ($addusers as $userid) {
                 // Prevent double role assignment.
-                if (in_array($user_id, $out_of_band_assignments)) {
+                if (in_array($userid, $outofbandassignments)) {
                     mtrace("User with id = ${user_id} had this role assigned out-of-band, skipping.");
                     continue;
                 }
-                role_assign($sync_job->get_role_id(), $user_id, $ctx->id, 'tool_ilioscategoryassignment');
-                $assignment_counter++;
+                role_assign($syncjob->get_role_id(), $userid, $ctx->id, 'tool_ilioscategoryassignment');
+                $assignmentcounter++;
             }
             mtrace("Assigned ${assignment_counter} user(s) into category.");
 
         }
 
-        $unassignment_counter = 0;
-        if ($remove_users_total) {
-            foreach ($remove_users as $user_id) {
-                role_unassign($sync_job->get_role_id(), $user_id, $ctx->id, 'tool_ilioscategoryassignment');
-                $unassignment_counter++;
+        $unassignmentcounter = 0;
+        if ($removeuserstotal) {
+            foreach ($removeusers as $userid) {
+                role_unassign($syncjob->get_role_id(), $userid, $ctx->id, 'tool_ilioscategoryassignment');
+                $unassignmentcounter++;
             }
-            mtrace("Un-assigned {$unassignment_counter} user(s) from category.");
+            mtrace("Un-assigned {$unassignmentcounter} user(s) from category.");
 
         }
 
-        mtrace("Finished syncing course category '{$formatted_category_name}'.");
+        mtrace("Finished syncing course category '{$formattedcategoryname}'.");
     }
 }

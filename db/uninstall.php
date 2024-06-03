@@ -15,6 +15,6 @@ require_once($CFG->libdir . '/accesslib.php');
  * @return bool
  */
 function xmldb_tool_ilioscategoryassignment_uninstall() {
-    role_unassign_all(array('component' => 'tool_ilioscategoryassignment'));
+    role_unassign_all(['component' => 'tool_ilioscategoryassignment']);
     return true;
 }

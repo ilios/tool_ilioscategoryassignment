@@ -13,6 +13,6 @@ $plugin->component = 'tool_ilioscategoryassignment';     // Full name of the plu
 $plugin->release = 'v4.3';
 $plugin->supported = [403, 403];
 $plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = array(
+$plugin->dependencies = [
     'local_iliosapiclient' => 2024032200,
-);
+];

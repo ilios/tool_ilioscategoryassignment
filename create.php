@@ -38,20 +38,20 @@ $mform = new create_sync_job();
 
 $data = $mform->get_data();
 if ($data) {
-    $sync_sources = array();
-    $ilios_school_id = (int) $data->iliosschoolid;
+    $syncsources = [];
+    $iliosschoolid = (int) $data->iliosschoolid;
 
-    $sync_job = new sync_job(
+    $syncjob = new sync_job(
         null,
         $data->title,
         (int) $data->roleid,
         (int) $data->categoryid,
         true,
-        $ilios_school_id
+        $iliosschoolid
     );
-    $sync_job = manager::create_job($sync_job);
-    $redirect_url = new moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php");
-    redirect($redirect_url, get_string('newjobcreated', 'tool_ilioscategoryassignment', $sync_job->get_title()), 10);
+    $syncjob = manager::create_job($syncjob);
+    $redirecturl = new moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php");
+    redirect($redirecturl, get_string('newjobcreated', 'tool_ilioscategoryassignment', $syncjob->get_title()), 10);
 } else {
     /* @var core_renderer $OUTPUT */
     echo $OUTPUT->header();

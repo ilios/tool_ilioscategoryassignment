@@ -28,8 +28,7 @@ defined('MOODLE_INTERNAL') || die();
  * @param int $oldversion
  * @return bool always true
  */
-function xmldb_tool_ilioscategoryassignment_upgrade($oldversion)
-{
+function xmldb_tool_ilioscategoryassignment_upgrade($oldversion) {
     global $DB;
 
     $dbman = $DB->get_manager();
@@ -47,6 +46,6 @@ function xmldb_tool_ilioscategoryassignment_upgrade($oldversion)
         }
         upgrade_plugin_savepoint(true, 2018041100, 'tool', 'ilioscategoryassignment');
     }
-    
+
     return true;
 }

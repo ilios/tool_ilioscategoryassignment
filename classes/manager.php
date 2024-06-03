@@ -36,7 +36,7 @@ class manager {
      * @throws \moodle_exception
      */
     public static function instantiate_ilios_client(): ilios_client {
-        return new ilios_client(manager::get_config('host_url', ''), new curl());
+        return new ilios_client(self::get_config('host_url', ''), new curl());
     }
 
     /**
@@ -46,7 +46,7 @@ class manager {
      * @throws \dml_exception
      */
     public static function get_sync_job($id) {
-        $jobs = self::get_sync_jobs(array('id' => $id));
+        $jobs = self::get_sync_jobs(['id' => $id]);
         return empty($jobs) ? null : $jobs[0];
     }
 
@@ -103,13 +103,13 @@ class manager {
      * @return sync_job[]
      * @throws \dml_exception
      */
-    public static function get_sync_jobs(array $filters = array()) {
+    public static function get_sync_jobs(array $filters = []) {
         global $DB;
-        $jobs = array();
-        $job_recs = $DB->get_records('tool_ilioscatassignment', $filters);
-        foreach ($job_recs as $job_rec) {
-            $jobs[] = new sync_job($job_rec->id, $job_rec->title, $job_rec->roleid, $job_rec->coursecatid,
-                (boolean) $job_rec->enabled, $job_rec->schoolid);
+        $jobs = [];
+        $jobrecs = $DB->get_records('tool_ilioscatassignment', $filters);
+        foreach ($jobrecs as $jobrec) {
+            $jobs[] = new sync_job($jobrec->id, $jobrec->title, $jobrec->roleid, $jobrec->coursecatid,
+                (boolean) $jobrec->enabled, $jobrec->schoolid);
         }
 
         return $jobs;
@@ -120,13 +120,13 @@ class manager {
      *
      * @throws \dml_exception
      */
-    public static function disable_job($job_id) {
+    public static function disable_job($jobid) {
         global $DB;
-        $table_name = 'tool_ilioscatassignment';
-        $job = $DB->get_record($table_name, array('id' => $job_id));
+        $tablename = 'tool_ilioscatassignment';
+        $job = $DB->get_record($tablename, ['id' => $jobid]);
         if (!empty($job)) {
             $job->enabled = false;
-            $DB->update_record($table_name, $job);
+            $DB->update_record($tablename, $job);
         }
     }
 
@@ -135,13 +135,13 @@ class manager {
      *
      * @throws \dml_exception
      */
-    public static function enable_job($job_id) {
+    public static function enable_job($jobid) {
         global $DB;
-        $table_name = 'tool_ilioscatassignment';
-        $job = $DB->get_record($table_name, array('id' => $job_id));
+        $tablename = 'tool_ilioscatassignment';
+        $job = $DB->get_record($tablename, ['id' => $jobid]);
         if (!empty($job)) {
             $job->enabled = true;
-            $DB->update_record($table_name, $job);
+            $DB->update_record($tablename, $job);
         }
     }
 
@@ -160,8 +160,8 @@ class manager {
         $dto->enabled = $job->is_enabled();
         $dto->schoolid = $job->get_school_id();
 
-        $job_id = $DB->insert_record('tool_ilioscatassignment', $dto);
-        return self::get_sync_job($job_id);
+        $jobid = $DB->insert_record('tool_ilioscatassignment', $dto);
+        return self::get_sync_job($jobid);
     }
 
     /**
@@ -171,15 +171,15 @@ class manager {
      * @throws \dml_exception
      * @throws \moodle_exception
      */
-    public static function delete_job($job_id) {
+    public static function delete_job($jobid) {
         global $DB;
-        $job = self::get_sync_job($job_id);
+        $job = self::get_sync_job($jobid);
         if (empty($job)) {
             return;
         }
 
         // delete the given job
-        $DB->delete_records('tool_ilioscatassignment', array('id' => $job_id));
+        $DB->delete_records('tool_ilioscatassignment', ['id' => $jobid]);
 
         // remove any course category role assignments that were managed by the given job
         $category = core_course_category::get($job->get_course_category_id(), IGNORE_MISSING);
@@ -187,8 +187,8 @@ class manager {
             return;
         }
         $context = $category->get_context();
-        role_unassign_all(array('component' => 'tool_ilioscategoryassignment', 'roleid' => $job->get_role_id(),
-            'contextid' => $context->id));
+        role_unassign_all(['component' => 'tool_ilioscategoryassignment', 'roleid' => $job->get_role_id(),
+            'contextid' => $context->id]);
     }
 
     /**
@@ -203,7 +203,7 @@ class manager {
      */
     public static function course_category_deleted(course_category_deleted $event) {
         $category = $event->get_coursecat();
-        $jobs = self::get_sync_jobs(array('coursecatid' => $category->id));
+        $jobs = self::get_sync_jobs(['coursecatid' => $category->id]);
         foreach ($jobs as $job) {
             self::delete_job($job->get_id());
         }

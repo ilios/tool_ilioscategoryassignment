@@ -53,17 +53,17 @@ class create_sync_job extends moodleform {
             return;
         }
 
-        $role_options = array();
+        $roleoptions = [];
         foreach ($roles as $role) {
-            $role_options[$role->id] = $role->localname;
+            $roleoptions[$role->id] = $role->localname;
         }
 
         try {
-            $ilios_client = manager::instantiate_ilios_client();
-            $access_token = manager::get_config('apikey', '');
-            $ilios_schools = $ilios_client->get($access_token, 'schools');
-            if (!empty($ilios_schools)) {
-                $ilios_schools = array_column($ilios_schools, 'title', 'id');
+            $iliosclient = manager::instantiate_ilios_client();
+            $accesstoken = manager::get_config('apikey', '');
+            $iliosschools = $iliosclient->get($accesstoken, 'schools');
+            if (!empty($iliosschools)) {
+                $iliosschools = array_column($iliosschools, 'title', 'id');
             }
         } catch (\Exception $e) {
             $warning = $renderer->notify_error(get_string('ilioserror', 'tool_ilioscategoryassignment'));
@@ -79,11 +79,11 @@ class create_sync_job extends moodleform {
         $mform->addElement('select', 'categoryid', get_string('selectcategory', 'tool_ilioscategoryassignment'), $categories);
         $mform->addRule('categoryid', null, 'required', null, 'client');
 
-        $mform->addElement('select', 'roleid', get_string('selectrole', 'tool_ilioscategoryassignment'), $role_options);
+        $mform->addElement('select', 'roleid', get_string('selectrole', 'tool_ilioscategoryassignment'), $roleoptions);
         $mform->addRule('roleid', null, 'required', null, 'client');
 
         $mform->addElement('select', 'iliosschoolid', get_string('selectiliosschool', 'tool_ilioscategoryassignment'),
-            $ilios_schools);
+            $iliosschools);
         $mform->addRule('iliosschoolid', null, 'required', null, 'client');
 
         $this->add_action_buttons(false, get_string('submit'));
