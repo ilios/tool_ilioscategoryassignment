@@ -4,7 +4,7 @@
        xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd"
 >
     <TABLES>
-        <TABLE NAME="tool_ilioscatassignment" COMMENT="Scheduled Ilios/Moodle course category sync jobs.">
+        <TABLE NAME="tool_ilioscategoryassignment" COMMENT="Scheduled Ilios/Moodle course category sync jobs.">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
                 <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="Title of the sync job." />

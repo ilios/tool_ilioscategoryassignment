@@ -17,19 +17,24 @@
 /**
  * Upgrade script.
  *
- * @package tool_ilioscategoryassignment
- * @link https://docs.moodle.org/dev/Plugin_files#db.2Funinstall.php
+ * @package    tool_ilioscategoryassignment
+ * @copyright  The Regents of the University of California
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
 /**
- * Upgrade the plugin.
+ * Plugin upgrade callback.
  *
- * @param int $oldversion
- * @return bool always true
+ * @param int $oldversion The old plugin version.
+ * @return bool Always TRUE.
+ * @throws ddl_exception
+ * @throws ddl_table_missing_exception
+ * @throws dml_exception
+ * @throws downgrade_exception
+ * @throws moodle_exception
+ * @throws upgrade_exception
  */
-function xmldb_tool_ilioscategoryassignment_upgrade($oldversion)
-{
+function xmldb_tool_ilioscategoryassignment_upgrade($oldversion): bool {
     global $DB;
 
     $dbman = $DB->get_manager();
@@ -40,13 +45,22 @@ function xmldb_tool_ilioscategoryassignment_upgrade($oldversion)
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        $DB->execute('UPDATE {tool_ilioscatassignment} t SET t.schoolid = (SELECT schoolid FROM {tool_ilioscatassignment_src} WHERE jobid = t.id ORDER BY id DESC LIMIT 1)');
+        $DB->execute(
+            'UPDATE {tool_ilioscatassignment} t SET t.schoolid = ' .
+            ' (SELECT schoolid FROM {tool_ilioscatassignment_src} WHERE jobid = t.id ORDER BY id DESC LIMIT 1)'
+        );
         $table = new xmldb_table('tool_ilioscatassignment_src');
         if ($dbman->table_exists($table)) {
             $dbman->drop_table($table);
         }
         upgrade_plugin_savepoint(true, 2018041100, 'tool', 'ilioscategoryassignment');
     }
-    
+
+    if ($oldversion < 2024060400) {
+        $table = new xmldb_table('tool_ilioscatassignment');
+        $dbman->rename_table($table, 'tool_ilioscategoryassignment');
+        upgrade_plugin_savepoint(true, 2024060400, 'tool', 'ilioscategoryassignment');
+    }
+
     return true;
 }

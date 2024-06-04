@@ -1,9 +1,25 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Form for creating a new sync job.
  *
- * @package  tool_ilioscategoryassignment
- * @category form
+ * @package    tool_ilioscategoryassignment
+ * @copyright  The Regents of the University of California
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace tool_ilioscategoryassignment\form;
@@ -11,30 +27,31 @@ namespace tool_ilioscategoryassignment\form;
 defined('MOODLE_INTERNAL') || die();
 
 use core_course_category;
+use Exception;
+use moodle_page;
 use moodleform;
 use tool_ilioscategoryassignment\manager;
 use tool_ilioscategoryassignment\output\renderer;
 
-/* @global $CFG */
 require_once($CFG->libdir . '/accesslib.php');
 require_once($CFG->libdir . '/formslib.php');
 
 /**
- * Form for creating a new sync job.
+ * New sync job form class.
  *
- * @package  tool_ilioscategoryassignment
- * @category form
+ * @package    tool_ilioscategoryassignment
+ * @copyright  The Regents of the University of California
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class create_sync_job extends moodleform {
-
     /**
-     * @inheritdoc
+     * Form definition.
      */
-    public function definition() {
-        /* @var \moodle_page $PAGE */
+    public function definition(): void {
+        /* @var moodle_page $PAGE The current page. */
         global $PAGE;
 
-        /* @var renderer $renderer */
+        /* @var renderer $renderer The plugin renderer. */
         $renderer = $PAGE->get_renderer('tool_ilioscategoryassignment');
 
         $mform = $this->_form;
@@ -53,25 +70,26 @@ class create_sync_job extends moodleform {
             return;
         }
 
-        $role_options = array();
+        $roleoptions = [];
         foreach ($roles as $role) {
-            $role_options[$role->id] = $role->localname;
+            $roleoptions[$role->id] = $role->localname;
         }
 
         try {
-            $ilios_client = manager::instantiate_ilios_client();
-            $access_token = manager::get_config('apikey', '');
-            $ilios_schools = $ilios_client->get($access_token, 'schools');
-            if (!empty($ilios_schools)) {
-                $ilios_schools = array_column($ilios_schools, 'title', 'id');
+            $iliosclient = manager::instantiate_ilios_client();
+            $accesstoken = manager::get_config('apikey', '');
+            $iliosschools = $iliosclient->get($accesstoken, 'schools');
+            if (!empty($iliosschools)) {
+                $iliosschools = array_column($iliosschools, 'title', 'id');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $warning = $renderer->notify_error(get_string('ilioserror', 'tool_ilioscategoryassignment'));
             $mform->addElement('html', $warning);
             return;
         }
 
-        $mform->addElement('text', 'title', get_string('title', 'tool_ilioscategoryassignment')); // Add elements to your form
+        // Add elements to your form.
+        $mform->addElement('text', 'title', get_string('title', 'tool_ilioscategoryassignment'));
         $mform->setType('title', PARAM_NOTAGS);
         $mform->addRule('title', null, 'required', null, 'client');
         $mform->addRule('title', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
@@ -79,11 +97,11 @@ class create_sync_job extends moodleform {
         $mform->addElement('select', 'categoryid', get_string('selectcategory', 'tool_ilioscategoryassignment'), $categories);
         $mform->addRule('categoryid', null, 'required', null, 'client');
 
-        $mform->addElement('select', 'roleid', get_string('selectrole', 'tool_ilioscategoryassignment'), $role_options);
+        $mform->addElement('select', 'roleid', get_string('selectrole', 'tool_ilioscategoryassignment'), $roleoptions);
         $mform->addRule('roleid', null, 'required', null, 'client');
 
         $mform->addElement('select', 'iliosschoolid', get_string('selectiliosschool', 'tool_ilioscategoryassignment'),
-            $ilios_schools);
+            $iliosschools);
         $mform->addRule('iliosschoolid', null, 'required', null, 'client');
 
         $this->add_action_buttons(false, get_string('submit'));

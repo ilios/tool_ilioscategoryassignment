@@ -1,22 +1,35 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * Adds this plugin to the admin menu.
+ * Admin settings.
  *
- * @package tool_ilioscategoryassignment
+ * @package    tool_ilioscategoryassignment
+ * @copyright  The Regents of the University of California
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-/* @var admin_root $ADMIN */
-/* @var $CFG */
-
 if ($hassiteconfig) {
-
     $ADMIN->add('root', new admin_category(
         'ilioscategoryassignment',
         get_string('pluginname', 'tool_ilioscategoryassignment')));
 
-    // Sync jobs admin page
+    // Sync jobs admin page.
     $ADMIN->add('ilioscategoryassignment', new admin_externalpage(
         'ilioscategoryassignment_jobs',
         get_string('syncjobs', 'tool_ilioscategoryassignment'),
@@ -24,7 +37,7 @@ if ($hassiteconfig) {
         'moodle/site:config'
     ));
 
-    // New job page
+    // New job page.
     $ADMIN->add('ilioscategoryassignment', new admin_externalpage(
         'ilioscategoryassignment_new_jobs',
         get_string('newsyncjob', 'tool_ilioscategoryassignment'),
@@ -32,7 +45,7 @@ if ($hassiteconfig) {
         'moodle/site:config'
     ));
 
-    // API client settings page
+    // API client settings page.
     $settings = new admin_settingpage(
         'ilioscategoryassignment_clientconfig',
         get_string('clientconfig', 'tool_ilioscategoryassignment'),
