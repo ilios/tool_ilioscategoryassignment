@@ -1,30 +1,42 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Create new sync job page.
  *
- * @package tool_ilioscategoryassignment
+ * @package    tool_ilioscategoryassignment
+ * @copyright  The Regents of the University of California
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 use tool_ilioscategoryassignment\form\create_sync_job;
 use tool_ilioscategoryassignment\manager;
 use tool_ilioscategoryassignment\output\renderer;
 use tool_ilioscategoryassignment\sync_job;
-use tool_ilioscategoryassignment\sync_source;
 
 require_once(__DIR__ . '/../../../config.php');
 
 require_login();
 require_capability('moodle/site:config', context_system::instance());
 
-/* @var $CFG */
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/tablelib.php');
 
 $action = optional_param('action', 'list', PARAM_ALPHA);
 
-/* @var moodle_page $PAGE */
-/* @var renderer $renderer */
 $PAGE->set_context(context_system::instance());
 $PAGE->set_url('/admin/tool/ilioscategoryassignment/create.php');
 $PAGE->set_pagelayout('admin');
@@ -53,7 +65,6 @@ if ($data) {
     $redirecturl = new moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php");
     redirect($redirecturl, get_string('newjobcreated', 'tool_ilioscategoryassignment', $syncjob->get_title()), 10);
 } else {
-    /* @var core_renderer $OUTPUT */
     echo $OUTPUT->header();
     echo $OUTPUT->heading($strheading);
     $mform->display();

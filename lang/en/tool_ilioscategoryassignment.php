@@ -1,11 +1,26 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Language strings.
+ * Language strings for the tool_ilioscategoryassignment plugin.
  *
- * @package tool_ilioscategoryassignment
+ * @package    tool_ilioscategoryassignment
+ * @copyright  The Regents of the University of California
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 $string['apikey'] = 'Ilios API key';
 $string['apikey_desc'] = 'Enter the API key obtained from your Ilios server.';
 $string['clientconfig'] = "Ilios API client configuration";
@@ -14,12 +29,11 @@ $string['deletejob'] = "Delete sync job";
 $string['deletejobconfirm'] = 'You are about to delete the Ilios category assignment sync job "{$a->jobtitle}". All users currently assigned as course participants in the "{$a->roletitle}" role to courses in the "{$a->coursecattitle}" course category using this method will be removed.<br><br>Are you sure you want to continue?';
 $string['host_url'] = 'Host URL';
 $string['host_url_desc'] = 'Type Ilios server IP address or host URL.';
-$string['ilioserror'] =
-    'An error occurred while accessing Ilios. Please check that Ilios is up and running, and that your connection to Ilios is configured correctly.';
+$string['ilioserror'] = 'An error occurred while accessing Ilios. Please check that Ilios is up and running, and that your connection to Ilios is configured correctly.';
 $string['iliosschool'] = 'Ilios school';
-$string['jobenabled'] = 'Enabled sync job "{$a}".';
 $string['jobdeleted'] = 'Deleted sync job "{$a}".';
 $string['jobdisabled'] = 'Disabled sync job "{$a}".';
+$string['jobenabled'] = 'Enabled sync job "{$a}".';
 $string['newjobcreated'] = 'Created new sync job "{$a}".';
 $string['newsyncjob'] = "New sync job";
 $string['noassignablecategories'] = 'There are currently no course categories that can be used for assignment.';
