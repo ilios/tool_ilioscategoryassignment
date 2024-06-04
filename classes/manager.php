@@ -127,7 +127,7 @@ class manager {
     public static function get_sync_jobs(array $filters = []): array {
         global $DB;
         $jobs = [];
-        $jobrecs = $DB->get_records('tool_ilioscatassignment', $filters);
+        $jobrecs = $DB->get_records('tool_ilioscategoryassignment', $filters);
         foreach ($jobrecs as $jobrec) {
             $jobs[] = new sync_job($jobrec->id, $jobrec->title, $jobrec->roleid, $jobrec->coursecatid,
                 (boolean) $jobrec->enabled, $jobrec->schoolid);
@@ -145,7 +145,7 @@ class manager {
      */
     public static function disable_job($jobid): void {
         global $DB;
-        $tablename = 'tool_ilioscatassignment';
+        $tablename = 'tool_ilioscategoryassignment';
         $job = $DB->get_record($tablename, ['id' => $jobid]);
         if (!empty($job)) {
             $job->enabled = false;
@@ -162,7 +162,7 @@ class manager {
      */
     public static function enable_job($jobid): void {
         global $DB;
-        $tablename = 'tool_ilioscatassignment';
+        $tablename = 'tool_ilioscategoryassignment';
         $job = $DB->get_record($tablename, ['id' => $jobid]);
         if (!empty($job)) {
             $job->enabled = true;
@@ -186,7 +186,7 @@ class manager {
         $dto->enabled = $job->is_enabled();
         $dto->schoolid = $job->get_school_id();
 
-        $jobid = $DB->insert_record('tool_ilioscatassignment', $dto);
+        $jobid = $DB->insert_record('tool_ilioscategoryassignment', $dto);
         return self::get_sync_job($jobid);
     }
 
@@ -207,7 +207,7 @@ class manager {
         }
 
         // Delete the given job.
-        $DB->delete_records('tool_ilioscatassignment', ['id' => $jobid]);
+        $DB->delete_records('tool_ilioscategoryassignment', ['id' => $jobid]);
 
         // Remove any course category role assignments that were managed by the given job.
         $category = core_course_category::get($job->get_course_category_id(), IGNORE_MISSING);

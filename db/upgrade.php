@@ -56,5 +56,11 @@ function xmldb_tool_ilioscategoryassignment_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2018041100, 'tool', 'ilioscategoryassignment');
     }
 
+    if ($oldversion < 2024060400) {
+        $table = new xmldb_table('tool_ilioscatassignment');
+        $dbman->rename_table($table, 'tool_ilioscategoryassignment');
+        upgrade_plugin_savepoint(true, 2024060400, 'tool', 'ilioscategoryassignment');
+    }
+
     return true;
 }
