@@ -53,17 +53,15 @@ if ($data) {
     $syncsources = [];
     $iliosschoolid = (int) $data->iliosschoolid;
 
-    $syncjob = new sync_job(
-        null,
-        $data->title,
-        (int) $data->roleid,
-        (int) $data->categoryid,
-        true,
-        $iliosschoolid
-    );
-    $syncjob = manager::create_job($syncjob);
+    $syncjob = new sync_job();
+    $syncjob->set('title', $data->title);
+    $syncjob->set('roleid', (int) $data->roleid);
+    $syncjob->set('coursecatid', (int) $data->categoryid);
+    $syncjob->set('enabled', true);
+    $syncjob->set('schoolid', $iliosschoolid);
+    $syncjob->save();
     $redirecturl = new moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php");
-    redirect($redirecturl, get_string('newjobcreated', 'tool_ilioscategoryassignment', $syncjob->get_title()), 10);
+    redirect($redirecturl, get_string('newjobcreated', 'tool_ilioscategoryassignment', $syncjob->get('title')), 10);
 } else {
     echo $OUTPUT->header();
     echo $OUTPUT->heading($strheading);

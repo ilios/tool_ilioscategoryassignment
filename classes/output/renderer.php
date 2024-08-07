@@ -26,7 +26,6 @@ namespace tool_ilioscategoryassignment\output;
 
 use coding_exception;
 use core\output\notification;
-use core_course_category;
 use html_table;
 use html_table_cell;
 use html_table_row;
@@ -52,14 +51,13 @@ class renderer extends plugin_renderer_base {
      * Renders a table displaying all configured sync jobs.
      *
      * @param sync_job[] $syncjobs
-     * @param core_course_category[] $coursecategories
      * @param stdClass[] $roles
      * @param string[] $iliosschools
      * @return string HTML to output.
      * @throws coding_exception
      * @throws moodle_exception
      */
-    public function sync_jobs_table(array $syncjobs, array $coursecategories, array $roles, array $iliosschools): string {
+    public function sync_jobs_table(array $syncjobs, array $roles, array $iliosschools): string {
         global $CFG;
         $table = new html_table();
         $table->head = [
@@ -73,24 +71,24 @@ class renderer extends plugin_renderer_base {
         $data = [];
 
         foreach ($syncjobs as $job) {
-            $titlecell = new html_table_cell($job->get_title());
+            $titlecell = new html_table_cell($job->get('title'));
             $titlecell->header = true;
 
-            $coursecategoryid = $job->get_course_category_id();
-            $coursetitle = get_string('notfound', 'tool_ilioscategoryassignment', $coursecategoryid);
-            if (!empty($coursecategories[$coursecategoryid])) {
-                $coursetitle = $coursecategories[$coursecategoryid]->get_nested_name();
+            $coursecategory = $job->get_course_category();
+            $coursetitle = get_string('notfound', 'tool_ilioscategoryassignment', $job->get('coursecatid'));
+            if ($coursecategory) {
+                $coursetitle = $coursecategory->get_nested_name();
             }
             $coursecatcell = new html_table_cell($coursetitle);
 
-            $roleid = $job->get_role_id();
-            $roletitle = get_string('notfound', 'tool_ilioscategoryassignment', $roleid);
+            $roleid = $job->get('roleid');
+            $roletitle = get_string('notfound', 'tool_ilioscategoryassignment',  $job->get('roleid'));
             if (array_key_exists($roleid, $roles)) {
                 $roletitle = $roles[$roleid]->localname;
             }
             $rolecell = new html_table_cell($roletitle);
 
-            $iliosschoolid = $job->get_school_id();
+            $iliosschoolid = $job->get('schoolid');
             $iliosschooltitle = get_string('notfound', 'tool_ilioscategoryassignment', $iliosschoolid);
             if (array_key_exists($iliosschoolid, $iliosschools)) {
                 $iliosschooltitle = $iliosschools[$iliosschoolid];
@@ -99,23 +97,23 @@ class renderer extends plugin_renderer_base {
             $iliosschoolcell = new html_table_cell($iliosschooltitle);
 
             $actions = [];
-            if ($job->is_enabled()) {
+            if ($job->get('enabled')) {
                 $actions[] = $this->action_icon(
                     new moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
-                        ['job_id' => $job->get_id(), 'action' => 'disable', 'sesskey' => sesskey()]),
+                        ['job_id' => $job->get('id'), 'action' => 'disable', 'sesskey' => sesskey()]),
                     new pix_icon('t/hide', new lang_string('disable'))
                 );
             } else {
                 $actions[] = $this->action_icon(
                     new moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
-                        ['job_id' => $job->get_id(), 'action' => 'enable', 'sesskey' => sesskey()]),
+                        ['job_id' => $job->get('id'), 'action' => 'enable', 'sesskey' => sesskey()]),
                     new pix_icon('t/show', new lang_string('enable'))
                 );
             }
 
             $actions[] = $this->action_icon(
                 new moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
-                    ['job_id' => $job->get_id(), 'action' => 'delete', 'sesskey' => sesskey()]),
+                    ['job_id' => $job->get('id'), 'action' => 'delete', 'sesskey' => sesskey()]),
                 new pix_icon('t/delete', new lang_string('delete'))
             );
 

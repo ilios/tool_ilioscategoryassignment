@@ -53,7 +53,7 @@ class sync_task extends scheduled_task {
      * @return string The task name.
      * @throws coding_exception
      */
-    public function get_name() {
+    public function get_name(): string {
         return get_string('taskname', 'tool_ilioscategoryassignment');
     }
 
@@ -85,7 +85,6 @@ class sync_task extends scheduled_task {
         }
 
         $accesstoken = manager::get_config('apikey', '');
-
         // Run enabled each sync job.
         foreach ($syncjobs as $syncjob) {
             $this->run_sync_job($syncjob, $accesstoken, $iliosclient);
@@ -98,10 +97,9 @@ class sync_task extends scheduled_task {
      * Retrieves the list of enabled sync jobs.
      *
      * @return array A list of enabled sync jobs.
-     * @throws dml_exception
      */
     protected function get_enabled_sync_jobs(): array {
-        return manager::get_sync_jobs(['enabled' => true]);
+        return sync_job::get_records(['enabled' => true]);
     }
 
     /**
@@ -115,14 +113,14 @@ class sync_task extends scheduled_task {
      * @throws Exception
      */
     protected function run_sync_job(sync_job $syncjob, string $accesstoken, ilios_client $iliosclient): void {
-        $jobtitle = $syncjob->get_title();
+        $jobtitle = $syncjob->get('title');
         mtrace("Started sync job '$jobtitle'.");
-        $coursecategory = core_course_category::get($syncjob->get_course_category_id(), IGNORE_MISSING);
+        $coursecategory = $syncjob->get_course_category();
         if (empty($coursecategory)) {
             mtrace('ERROR: Failed to load course category with ID = ' . $syncjob->get_course_category_id());
             return;
         }
-        $iliosusers = $this->get_users_from_ilios($syncjob, $accesstoken,  $iliosclient);
+        $iliosusers = $this->get_users_from_ilios($syncjob, $accesstoken, $iliosclient);
         mtrace('Retrieved ' . count($iliosusers) . ' Ilios user(s) to sync.');
         $moodleusers = $this->get_moodle_users($iliosusers);
         $this->sync_category($syncjob, $coursecategory, $moodleusers);
@@ -142,7 +140,7 @@ class sync_task extends scheduled_task {
         $iliosusers = [];
 
         $filters = [
-            'school' => $syncjob->get_school_id(),
+            'school' => $syncjob->get('schoolid'),
             'enabled' => true,
         ];
         try {
@@ -215,11 +213,11 @@ class sync_task extends scheduled_task {
      * @param array $userids A list of IDs of users that were updated during this sync job.
      * @throws coding_exception
      */
-    public function sync_category(sync_job $syncjob, core_course_category $coursecategory, array $userids): void {
+    protected function sync_category(sync_job $syncjob, core_course_category $coursecategory, array $userids): void {
         $formattedcategoryname = $coursecategory->get_formatted_name();
         mtrace("Started syncing course category '$formattedcategoryname'.");
         $role = new stdClass();
-        $role->id = $syncjob->get_role_id();
+        $role->id = $syncjob->get('roleid');
         $ctx = $coursecategory->get_context();
         $roleassignments = get_users_from_role_on_context($role, $ctx);
 
@@ -259,7 +257,7 @@ class sync_task extends scheduled_task {
                     mtrace("User with id = $userid had this role assigned out-of-band, skipping.");
                     continue;
                 }
-                role_assign($syncjob->get_role_id(), $userid, $ctx->id, 'tool_ilioscategoryassignment');
+                role_assign($syncjob->get('roleid'), $userid, $ctx->id, 'tool_ilioscategoryassignment');
                 $assignmentcounter++;
             }
             mtrace("Assigned $assignmentcounter user(s) into category.");
@@ -268,7 +266,7 @@ class sync_task extends scheduled_task {
         $unassignmentcounter = 0;
         if ($removeuserstotal) {
             foreach ($removeusers as $userid) {
-                role_unassign($syncjob->get_role_id(), $userid, $ctx->id, 'tool_ilioscategoryassignment');
+                role_unassign($syncjob->get('roleid'), $userid, $ctx->id, 'tool_ilioscategoryassignment');
                 $unassignmentcounter++;
             }
             mtrace("Un-assigned $unassignmentcounter user(s) from category.");

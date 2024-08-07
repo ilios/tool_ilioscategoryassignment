@@ -24,6 +24,7 @@
 
 use core\output\notification;
 use tool_ilioscategoryassignment\manager;
+use tool_ilioscategoryassignment\sync_job;
 
 require_once(__DIR__ . '/../../../config.php');
 
@@ -50,15 +51,17 @@ $renderer = $PAGE->get_renderer('tool_ilioscategoryassignment');
 if (in_array($action, ['enable', 'disable', 'delete'])) {
     require_sesskey();
     $jobid = required_param('job_id', PARAM_INT);
-    $job = manager::get_sync_job($jobid);
+    $job = new sync_job($jobid);
     if (!empty($job)) {
         if ('enable' === $action && confirm_sesskey()) {
-            manager::enable_job($jobid);
-            $returnmsg = get_string('jobenabled', 'tool_ilioscategoryassignment', $job->get_title());
+            $job->set('enabled', true);
+            $job->save();
+            $returnmsg = get_string('jobenabled', 'tool_ilioscategoryassignment', $job->get('title'));
             redirect($returnurl, $returnmsg, null, notification::NOTIFY_SUCCESS);
         } else if ('disable' === $action && confirm_sesskey()) {
-            manager::disable_job($jobid);
-            $returnmsg = get_string('jobdisabled', 'tool_ilioscategoryassignment', $job->get_title());
+            $job->set('enabled', false);
+            $job->save();
+            $returnmsg = get_string('jobdisabled', 'tool_ilioscategoryassignment', $job->get('title'));
             redirect($returnurl, $returnmsg, null, notification::NOTIFY_SUCCESS);
         } else if ('delete' === $action && confirm_sesskey()) {
             if ($confirm !== md5($action)) {
@@ -66,25 +69,23 @@ if (in_array($action, ['enable', 'disable', 'delete'])) {
                 echo $OUTPUT->heading(get_string('deletejob', 'tool_ilioscategoryassignment'));
                 $deleteurl = new moodle_url(
                     $returnurl,
-                    ['action' => $action, 'job_id' => $job->get_id(), 'confirm' => md5($action), 'sesskey' => sesskey()]
+                    ['action' => $action, 'job_id' => $job->get('id'), 'confirm' => md5($action), 'sesskey' => sesskey()]
                 );
                 $deletebutton = new single_button($deleteurl, get_string('delete'), 'post');
 
                 $a = new stdClass();
-                $a->jobtitle = $job->get_title();
-
-                $roleid = $job->get_role_id();
+                $a->jobtitle = $job->get('title');
+                $roleid = $job->get('roleid');
                 $roles = role_get_names();
                 $a->roletitle = get_string('notfound', 'tool_ilioscategoryassignment', $roleid);
                 if (array_key_exists($roleid, $roles)) {
                     $a->roletitle = $roles[$roleid]->localname;
                 }
 
-                $coursecatid = $job->get_course_category_id();
-                $coursecat = core_course_category::get($coursecatid, IGNORE_MISSING);
-                $a->coursecattitle = get_string('notfound', 'tool_ilioscategoryassignment', $coursecatid);
-                if (! empty($coursecat)) {
-                    $a->coursecattitle = $coursecat->get_nested_name(false);
+                $coursecategory = $job->get_course_category();
+                $a->coursecattitle = get_string('notfound', 'tool_ilioscategoryassignment', $job->get('coursecatid'));
+                if ($coursecategory) {
+                    $a->coursecattitle = $coursecategory->get_nested_name(false);
                 }
 
                 echo $OUTPUT->confirm(
@@ -95,8 +96,8 @@ if (in_array($action, ['enable', 'disable', 'delete'])) {
                 echo $OUTPUT->footer();
                 die;
             } else if (data_submitted()) {
-                manager::delete_job($jobid);
-                $returnmsg = get_string('jobdeleted', 'tool_ilioscategoryassignment', $job->get_title());
+                $job->delete();
+                $returnmsg = get_string('jobdeleted', 'tool_ilioscategoryassignment', $job->get('title'));
                 redirect($returnurl, $returnmsg, null, notification::NOTIFY_SUCCESS);
 
             }
@@ -105,15 +106,13 @@ if (in_array($action, ['enable', 'disable', 'delete'])) {
     }
 }
 
-$jobs = manager::get_sync_jobs();
+$jobs = sync_job::get_records();
 
 $coursecategories = [];
 $roles = [];
 $iliosschools = [];
 
 if (!empty($jobs)) {
-    $coursecategoryids = array_column($jobs, 'coursecategoryid');
-    $coursecategories = core_course_category::get_many($coursecategoryids);
     $roles = role_get_names();
 }
 
@@ -128,5 +127,5 @@ try {
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('syncjobscount', 'tool_ilioscategoryassignment', count($jobs)));
-echo $renderer->sync_jobs_table($jobs, $coursecategories, $roles, $iliosschools);
+echo $renderer->sync_jobs_table($jobs, $roles, $iliosschools);
 echo $OUTPUT->footer();

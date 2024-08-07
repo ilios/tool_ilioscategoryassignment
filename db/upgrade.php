@@ -62,5 +62,31 @@ function xmldb_tool_ilioscategoryassignment_upgrade($oldversion): bool {
         upgrade_plugin_savepoint(true, 2024060400, 'tool', 'ilioscategoryassignment');
     }
 
+    if ($oldversion < 2024080600) {
+        $tablename = 'tool_ilioscategoryassignment';
+        $table = new xmldb_table($tablename);
+        foreach (['timecreated', 'timemodified', 'usermodified'] as $field) {
+            $dbman->add_field(
+                $table,
+                new xmldb_field($field, XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0)
+            );
+        }
+        $admin = get_admin();
+        $adminid = $admin ? $admin->id : 0;
+        $time = time();
+
+        $jobs = $DB->get_records($tablename);
+        foreach ($jobs as $job) {
+            $job->timecreated = $time;
+            $job->timemodified = $time;
+            $job->usermodified = $adminid;
+            $DB->update_record($tablename, $job);
+        }
+
+        $table->add_key('usermodified', XMLDB_KEY_FOREIGN, ['usermodified'], 'user', ['id']);
+
+        upgrade_plugin_savepoint(true, 2024080600, 'tool', 'ilioscategoryassignment');
+    }
+
     return true;
 }

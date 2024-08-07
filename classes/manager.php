@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Handles sync job, configuration and Ilios client management.
+ * Handles configuration and Ilios client management.
  *
  * @package    tool_ilioscategoryassignment
  * @copyright  The Regents of the University of California
@@ -26,7 +26,6 @@ namespace tool_ilioscategoryassignment;
 
 use coding_exception;
 use core\event\course_category_deleted;
-use core_course_category;
 use curl;
 use dml_exception;
 use local_iliosapiclient\ilios_client;
@@ -49,6 +48,7 @@ require_once($CFG->libdir . '/accesslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class manager {
+
     /**
      * Instantiates and returns an Ilios API client.
      *
@@ -57,18 +57,6 @@ class manager {
      */
     public static function instantiate_ilios_client(): ilios_client {
         return new ilios_client(self::get_config('host_url', ''), new curl());
-    }
-
-    /**
-     * Retrieves a sync job by its given ID.
-     *
-     * @param int $id The sync job ID.
-     * @return sync_job|null The sync job, or NULL if none were found.
-     * @throws dml_exception
-     */
-    public static function get_sync_job($id) {
-        $jobs = self::get_sync_jobs(['id' => $id]);
-        return empty($jobs) ? null : $jobs[0];
     }
 
     /**
@@ -118,122 +106,19 @@ class manager {
     }
 
     /**
-     * Retrieves all sync jobs matching the given filters.
-     *
-     * @param array $filters The filter criteria.
-     * @return array A list of sync jobs.
-     * @throws dml_exception
-     */
-    public static function get_sync_jobs(array $filters = []): array {
-        global $DB;
-        $jobs = [];
-        $jobrecs = $DB->get_records('tool_ilioscategoryassignment', $filters);
-        foreach ($jobrecs as $jobrec) {
-            $jobs[] = new sync_job($jobrec->id, $jobrec->title, $jobrec->roleid, $jobrec->coursecatid,
-                (boolean) $jobrec->enabled, $jobrec->schoolid);
-        }
-
-        return $jobs;
-    }
-
-    /**
-     * Disables a given sync job.
-     *
-     * @param int $jobid The job ID.
-     * @return void
-     * @throws dml_exception
-     */
-    public static function disable_job($jobid): void {
-        global $DB;
-        $tablename = 'tool_ilioscategoryassignment';
-        $job = $DB->get_record($tablename, ['id' => $jobid]);
-        if (!empty($job)) {
-            $job->enabled = false;
-            $DB->update_record($tablename, $job);
-        }
-    }
-
-    /**
-     * Enables a given sync job.
-     *
-     * @param int $jobid The job ID.
-     * @return void
-     * @throws dml_exception
-     */
-    public static function enable_job($jobid): void {
-        global $DB;
-        $tablename = 'tool_ilioscategoryassignment';
-        $job = $DB->get_record($tablename, ['id' => $jobid]);
-        if (!empty($job)) {
-            $job->enabled = true;
-            $DB->update_record($tablename, $job);
-        }
-    }
-
-    /**
-     * Creates and returns a new sync job.
-     * @param sync_job $job The new sync job to create.
-     * @return sync_job The created sync job.
-     * @throws dml_exception
-     */
-    public static function create_job(sync_job $job) {
-        global $DB;
-
-        $dto = new stdClass();
-        $dto->title = $job->get_title();
-        $dto->roleid = $job->get_role_id();
-        $dto->coursecatid = $job->get_course_category_id();
-        $dto->enabled = $job->is_enabled();
-        $dto->schoolid = $job->get_school_id();
-
-        $jobid = $DB->insert_record('tool_ilioscategoryassignment', $dto);
-        return self::get_sync_job($jobid);
-    }
-
-    /**
-     * Deletes a given sync job.
-     *
-     * @param int $jobid The sync job ID.
-     * @return void
-     * @throws coding_exception
-     * @throws dml_exception
-     * @throws moodle_exception
-     */
-    public static function delete_job($jobid): void {
-        global $DB;
-        $job = self::get_sync_job($jobid);
-        if (empty($job)) {
-            return;
-        }
-
-        // Delete the given job.
-        $DB->delete_records('tool_ilioscategoryassignment', ['id' => $jobid]);
-
-        // Remove any course category role assignments that were managed by the given job.
-        $category = core_course_category::get($job->get_course_category_id(), IGNORE_MISSING);
-        if (empty($category)) {
-            return;
-        }
-        $context = $category->get_context();
-        role_unassign_all(['component' => 'tool_ilioscategoryassignment', 'roleid' => $job->get_role_id(),
-            'contextid' => $context->id]);
-    }
-
-    /**
      * Event observer for the "course category deleted" event.
      * Removes any sync jobs and role assignments associated with that category.
      *
      * @param course_category_deleted $event
      * @return void
      * @throws coding_exception
-     * @throws dml_exception
      * @throws moodle_exception
      */
     public static function course_category_deleted(course_category_deleted $event): void {
         $category = $event->get_coursecat();
-        $jobs = self::get_sync_jobs(['coursecatid' => $category->id]);
+        $jobs = sync_job::get_records(['coursecatid' => $category->id]);
         foreach ($jobs as $job) {
-            self::delete_job($job->get_id());
+            $job->delete();
         }
     }
 }

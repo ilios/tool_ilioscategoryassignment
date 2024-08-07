@@ -24,134 +24,86 @@
 
 namespace tool_ilioscategoryassignment;
 
+use coding_exception;
+use core\persistent;
+use core_course_category;
+use moodle_exception;
+
+defined('MOODLE_INTERNAL') || die();
+
+require_once($CFG->libdir . '/accesslib.php');
+
 /**
- * Sync job model class.
+ * Sync job active record.
  *
  * @package    tool_ilioscategoryassignment
  * @copyright  The Regents of the University of California
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class sync_job {
-    /**
-     * @var int $id The sync job ID.
-     */
-    protected $id;
+class sync_job extends persistent {
 
     /**
-     * @var string $title The sync job title.
+     * @var string The sync job database table name.
      */
-    protected $title;
+    const TABLE = 'tool_ilioscategoryassignment';
 
     /**
-     * @var int $role_id The Moodle user role ID to assign to users during sync.
-     */
-    protected $roleid;
-
-    /**
-     * @var int $coursecategoryid The Moodle course category ID to sync users into.
-     */
-    protected $coursecategoryid;
-
-    /**
-     * @var bool $enabled TRUE if this job is enabled, otherwise FALSE.
-     */
-    protected $enabled;
-
-    /**
-     * @var int $schoolid The Ilios school ID to sync users from.
-     */
-    protected $schoolid;
-
-    /**
-     * Constructor.
+     * Retrieves the model definition.
      *
-     * @param int $id The sync job Id.
-     * @param string $title The sync job title.
-     * @param int $roleid The Moodle user role ID to assign to users during sync.
-     * @param int $coursecategoryid The Moodle course category ID to sync users into.
-     * @param bool $enabled TRUE if this job is enabled, otherwise FALSE.
-     * @param int $schoolid The Ilios school ID to sync users from.
+     * @return array
      */
-    public function __construct($id, $title, $roleid, $coursecategoryid, $enabled, $schoolid) {
-        $this->id = $id;
-        $this->title = $title;
-        $this->roleid = $roleid;
-        $this->coursecategoryid = $coursecategoryid;
-        $this->enabled = $enabled;
-        $this->schoolid = $schoolid;
+    protected static function define_properties(): array {
+        return [
+            'title' => [
+                'type' => PARAM_RAW,
+            ],
+            'schoolid' => [
+                'type' => PARAM_INT,
+            ],
+            'coursecatid' => [
+                'type' => PARAM_INT,
+            ],
+            'roleid' => [
+                'type' => PARAM_INT,
+            ],
+            'enabled' => [
+                'type' => PARAM_BOOL,
+                'default' => true,
+            ],
+        ];
     }
 
     /**
-     * Returns the sync job ID.
+     * Returns the course category that this sync job applies to.
      *
-     * @return int The sync job ID.
+     * @return ?core_course_category
+     * @throws coding_exception
+     * @throws moodle_exception
      */
-    public function get_id() {
-        return $this->id;
+    public function get_course_category(): ?core_course_category {
+        return core_course_category::get(
+            $this->get('coursecatid'),
+            IGNORE_MISSING,
+            true
+        );
     }
 
     /**
-     * Returns the sync job title.
-     *
-     * @return string The sync job title.
+     * Remove any course category role assignments that were managed by this job before deleting it.
+     * @return void
+     * @throws coding_exception
+     * @throws moodle_exception
      */
-    public function get_title() {
-        return $this->title;
-    }
-
-    /**
-     * Returns the Moodle user role ID.
-     *
-     * @return int The user role ID.
-     */
-    public function get_role_id() {
-        return $this->roleid;
-    }
-
-    /**
-     * Returns the Ilios school ID.
-     *
-     * @return int The school ID.
-     */
-    public function get_school_id() {
-        return $this->schoolid;
-    }
-
-    /**
-     * Returns the Moodle course category ID.
-     *
-     * @return int The course category ID.
-     */
-    public function get_course_category_id() {
-        return $this->coursecategoryid;
-    }
-
-    /**
-     * Returns whether this sync job is enabled or not.
-     *
-     * @return bool TRUE if this job is enabled, otherwise FALSE.
-     */
-    public function is_enabled() {
-        return $this->enabled;
-    }
-
-    /**
-     * Magic getter function.
-     *
-     * @param string $prop The property name.
-     * @return mixed The property value.
-     */
-    public function __get($prop) {
-        return $this->$prop;
-    }
-
-    /**
-     * Determine if a variable is declared and is different from NULL.
-     *
-     * @param string $prop The property name.
-     * @return bool TRUE if the property is declared/set, FALSE otherwise.
-     */
-    public function __isset($prop) {
-        return isset($this->$prop);
+    protected function before_delete(): void {
+        $category = $this->get_course_category();
+        if (!$category) {
+            return;
+        }
+        $context = $category->get_context();
+        role_unassign_all([
+            'component' => 'tool_ilioscategoryassignment',
+            'roleid' => $this->get('roleid'),
+            'contextid' => $context->id,
+        ]);
     }
 }
