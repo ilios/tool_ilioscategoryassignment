@@ -27,17 +27,15 @@ namespace tool_ilioscategoryassignment;
 use coding_exception;
 use core\event\course_category_deleted;
 use curl;
-use dml_exception;
 use local_iliosapiclient\ilios_client;
 use moodle_exception;
-use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/accesslib.php');
 
 /**
- * Handler class for sync job, configuration and Ilios client management.
+ * Handler class event callbacks and Ilios API client management.
  *
  * In other words, this is the kitchen sink.
  * This is obviously less than ideal, but still better than polluting the global namespace with functions in locallib.php.
@@ -56,53 +54,8 @@ class manager {
      * @throws moodle_exception
      */
     public static function instantiate_ilios_client(): ilios_client {
-        return new ilios_client(self::get_config('host_url', ''), new curl());
-    }
-
-    /**
-     * Loads, caches and returns the configuration for this plugin.
-     *
-     * @return stdClass The plugin configuration object.
-     * @see get_config()
-     * @throws dml_exception
-     */
-    public static function get_plugin_config() {
-        static $config = null;
-        if (!isset($config)) {
-            $config = get_config('tool_ilioscategoryassignment');
-        }
-        return $config;
-    }
-
-    /**
-     * Returns a configuration item by its given name or a given default value.
-     *
-     * @param string $name The config item name.
-     * @param string $default A default value if the config item does not exist.
-     * @return mixed The config value or the given default value.
-     * @throws dml_exception
-     */
-    public static function get_config($name, $default = null) {
-        $config = self::get_plugin_config();
-        return isset($config->$name) ? $config->$name : $default;
-    }
-
-    /**
-     * Sets and stores a given config value.
-     *
-     * @param string $name The config item name.
-     * @param string $value string The config item's value, NULL means unset the config item.
-     * @return void
-     * @throws dml_exception
-     */
-    public static function set_config($name, $value): void {
-        $config = self::get_plugin_config();
-        if ($value === null) {
-            unset($config->$name);
-        } else {
-            $config->$name = $value;
-        }
-        set_config($name, $value, 'tool_ilioscategoryassignment');
+        $url = get_config('tool_ilioscategoryassignment', 'host_url') ?: '';
+        return new ilios_client($url, new curl());
     }
 
     /**

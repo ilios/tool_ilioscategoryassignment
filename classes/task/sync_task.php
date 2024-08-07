@@ -84,7 +84,7 @@ class sync_task extends scheduled_task {
             throw new Exception('ERROR: Failed to instantiate Ilios client.' . 0, $e);
         }
 
-        $accesstoken = manager::get_config('apikey', '');
+        $accesstoken = get_config('tool_ilioscategoryassignment', 'apikey') ?: '';
         // Run enabled each sync job.
         foreach ($syncjobs as $syncjob) {
             $this->run_sync_job($syncjob, $accesstoken, $iliosclient);

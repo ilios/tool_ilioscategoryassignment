@@ -99,9 +99,7 @@ if (in_array($action, ['enable', 'disable', 'delete'])) {
                 $job->delete();
                 $returnmsg = get_string('jobdeleted', 'tool_ilioscategoryassignment', $job->get('title'));
                 redirect($returnurl, $returnmsg, null, notification::NOTIFY_SUCCESS);
-
             }
-
         }
     }
 }
@@ -117,7 +115,7 @@ if (!empty($jobs)) {
 }
 
 try {
-    $accesstoken = manager::get_config('apikey', '');
+    $accesstoken = get_config('tool_ilioscategoryassignment', 'apikey') ?: '';
     $iliosclient = manager::instantiate_ilios_client();
     $iliosschools = $iliosclient->get($accesstoken, 'schools');
     $iliosschools = array_column($iliosschools, 'title', 'id');

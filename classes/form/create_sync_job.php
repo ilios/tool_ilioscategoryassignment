@@ -77,7 +77,7 @@ class create_sync_job extends moodleform {
 
         try {
             $iliosclient = manager::instantiate_ilios_client();
-            $accesstoken = manager::get_config('apikey', '');
+            $accesstoken = get_config('tool_ilioscategoryassignment', 'apikey') ?: '';
             $iliosschools = $iliosclient->get($accesstoken, 'schools');
             if (!empty($iliosschools)) {
                 $iliosschools = array_column($iliosschools, 'title', 'id');
