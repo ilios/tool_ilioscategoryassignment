@@ -57,21 +57,4 @@ class manager {
         $url = get_config('tool_ilioscategoryassignment', 'host_url') ?: '';
         return new ilios_client($url, new curl());
     }
-
-    /**
-     * Event observer for the "course category deleted" event.
-     * Removes any sync jobs and role assignments associated with that category.
-     *
-     * @param course_category_deleted $event
-     * @return void
-     * @throws coding_exception
-     * @throws moodle_exception
-     */
-    public static function course_category_deleted(course_category_deleted $event): void {
-        $category = $event->get_coursecat();
-        $jobs = sync_job::get_records(['coursecatid' => $category->id]);
-        foreach ($jobs as $job) {
-            $job->delete();
-        }
-    }
 }
