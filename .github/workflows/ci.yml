@@ -36,7 +36,7 @@ jobs:
             database: 'mariadb'
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: plugin
 
@@ -105,6 +105,15 @@ jobs:
       - name: Behat features
         if: ${{ !cancelled() }}
         run: moodle-plugin-ci behat --profile chrome
+
+      - name: Upload Behat Faildump
+        if: ${{ failure() && steps.behat.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: Behat Faildump (${{ join(matrix.*, ', ') }})
+          path: ${{ github.workspace }}/moodledata/behat_dump
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Mark cancelled jobs as failed.
         if: ${{ cancelled() }}
