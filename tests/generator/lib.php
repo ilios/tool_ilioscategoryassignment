@@ -24,25 +24,7 @@
  */
 
 use core\invalid_persistent_exception;
-use core_competency\competency;
-use core_competency\competency_framework;
-use core_competency\course_competency;
-use core_competency\course_module_competency;
-use core_competency\evidence;
-use core_competency\external;
-use core_competency\plan;
-use core_competency\plan_competency;
-use core_competency\related_competency;
-use core_competency\template;
-use core_competency\template_cohort;
-use core_competency\template_competency;
-use core_competency\user_competency;
-use core_competency\user_competency_course;
-use core_competency\user_competency_plan;
-use core_competency\user_evidence;
-use core_competency\user_evidence_competency;
 use tool_ilioscategoryassignment\sync_job;
-
 
 defined('MOODLE_INTERNAL') || die();
 
