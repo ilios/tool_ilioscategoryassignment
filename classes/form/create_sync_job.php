@@ -26,11 +26,12 @@ namespace tool_ilioscategoryassignment\form;
 
 defined('MOODLE_INTERNAL') || die();
 
+use core\di;
 use core_course_category;
 use Exception;
 use moodle_page;
 use moodleform;
-use tool_ilioscategoryassignment\manager;
+use tool_ilioscategoryassignment\ilios;
 use tool_ilioscategoryassignment\output\renderer;
 
 require_once($CFG->libdir . '/accesslib.php');
@@ -76,9 +77,8 @@ class create_sync_job extends moodleform {
         }
 
         try {
-            $iliosclient = manager::instantiate_ilios_client();
-            $accesstoken = get_config('tool_ilioscategoryassignment', 'apikey') ?: '';
-            $iliosschools = $iliosclient->get($accesstoken, 'schools');
+            $iliosclient = di::get(ilios::class);
+            $iliosschools = $iliosclient->get_schools();
             if (!empty($iliosschools)) {
                 $iliosschools = array_column($iliosschools, 'title', 'id');
             }

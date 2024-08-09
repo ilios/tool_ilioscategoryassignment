@@ -34,9 +34,6 @@ jobs:
           - php: '8.3'
             moodle-branch: 'MOODLE_404_STABLE'
             database: 'mariadb'
-          - php: '8.2'
-            moodle-branch: 'MOODLE_403_STABLE'
-            database: 'mariadb'
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3

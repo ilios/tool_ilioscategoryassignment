@@ -23,8 +23,6 @@
  */
 
 use tool_ilioscategoryassignment\form\create_sync_job;
-use tool_ilioscategoryassignment\manager;
-use tool_ilioscategoryassignment\output\renderer;
 use tool_ilioscategoryassignment\sync_job;
 
 require_once(__DIR__ . '/../../../config.php');

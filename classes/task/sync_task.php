@@ -25,14 +25,14 @@
 namespace tool_ilioscategoryassignment\task;
 
 use coding_exception;
+use core\di;
 use core\task\scheduled_task;
 use core_course_category;
 use dml_exception;
 use Exception;
-use local_iliosapiclient\ilios_client;
 use moodle_exception;
 use stdClass;
-use tool_ilioscategoryassignment\manager;
+use tool_ilioscategoryassignment\ilios;
 use tool_ilioscategoryassignment\sync_job;
 
 defined('MOODLE_INTERNAL') || die();
@@ -78,16 +78,15 @@ class sync_task extends scheduled_task {
         }
 
         try {
-            $iliosclient = manager::instantiate_ilios_client();
+            $iliosclient = di::get(ilios::class);
         } catch (Exception $e) {
             // Re-throw exception.
             throw new Exception('ERROR: Failed to instantiate Ilios client.' . 0, $e);
         }
 
-        $accesstoken = get_config('tool_ilioscategoryassignment', 'apikey') ?: '';
         // Run enabled each sync job.
         foreach ($syncjobs as $syncjob) {
-            $this->run_sync_job($syncjob, $accesstoken, $iliosclient);
+            $this->run_sync_job($syncjob, $iliosclient);
         }
 
         mtrace('Finished Ilios Category Assignment sync job.');
@@ -106,13 +105,12 @@ class sync_task extends scheduled_task {
      * Performs a given sync job.
      *
      * @param sync_job $syncjob The sync job.
-     * @param string $accesstoken An Ilios API access token.
-     * @param ilios_client $iliosclient The Ilios API client.
+     * @param ilios $iliosclient The Ilios API client.
      * @return void
      * @throws moodle_exception
      * @throws Exception
      */
-    protected function run_sync_job(sync_job $syncjob, string $accesstoken, ilios_client $iliosclient): void {
+    protected function run_sync_job(sync_job $syncjob, ilios $iliosclient): void {
         $jobtitle = $syncjob->get('title');
         mtrace("Started sync job '$jobtitle'.");
         $coursecategory = $syncjob->get_course_category();
@@ -120,7 +118,7 @@ class sync_task extends scheduled_task {
             mtrace('ERROR: Failed to load course category with ID = ' . $syncjob->get_course_category_id());
             return;
         }
-        $iliosusers = $this->get_users_from_ilios($syncjob, $accesstoken, $iliosclient);
+        $iliosusers = $this->get_users_from_ilios($syncjob, $iliosclient);
         mtrace('Retrieved ' . count($iliosusers) . ' Ilios user(s) to sync.');
         $moodleusers = $this->get_moodle_users($iliosusers);
         $this->sync_category($syncjob, $coursecategory, $moodleusers);
@@ -131,27 +129,14 @@ class sync_task extends scheduled_task {
      * Retrieves a list of campus IDs for users qualifying for the given sync job from Ilios.
      *
      * @param sync_job $syncjob The sync job.
-     * @param string $accesstoken The Ilios API access token.
-     * @param ilios_client $iliosclient The Ilios API client.
+     * @param ilios $iliosclient The Ilios API client.
      * @return array A list of campus IDs.
      * @throws Exception
      */
-    protected function get_users_from_ilios(sync_job $syncjob, string $accesstoken, ilios_client $iliosclient): array {
+    protected function get_users_from_ilios(sync_job $syncjob, ilios $iliosclient): array {
         $iliosusers = [];
-
-        $filters = [
-            'school' => $syncjob->get('schoolid'),
-            'enabled' => true,
-        ];
         try {
-            $records = $iliosclient->get(
-                $accesstoken,
-                'users',
-                $filters,
-                null,
-                5000
-
-            );
+            $records = $iliosclient->get_enabled_users_in_school($syncjob->get('schoolid'));
         } catch (Exception $e) {
             // Re-throw exception with a better error message.
             throw new Exception('Failed to retrieve users from Ilios with the following error message.', 0, $e);

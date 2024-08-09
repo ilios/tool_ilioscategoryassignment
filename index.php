@@ -22,8 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+use core\di;
 use core\output\notification;
-use tool_ilioscategoryassignment\manager;
+use tool_ilioscategoryassignment\ilios;
 use tool_ilioscategoryassignment\sync_job;
 
 require_once(__DIR__ . '/../../../config.php');
@@ -116,8 +117,8 @@ if (!empty($jobs)) {
 
 try {
     $accesstoken = get_config('tool_ilioscategoryassignment', 'apikey') ?: '';
-    $iliosclient = manager::instantiate_ilios_client();
-    $iliosschools = $iliosclient->get($accesstoken, 'schools');
+    $iliosclient = di::get(ilios::class);
+    $iliosschools = $iliosclient->get_schools();
     $iliosschools = array_column($iliosschools, 'title', 'id');
 } catch (Exception $e) {
     echo $renderer->notify_error(get_string('ilioserror', 'tool_ilioscategoryassignment'));
