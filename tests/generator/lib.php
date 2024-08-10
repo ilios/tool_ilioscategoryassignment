@@ -24,6 +24,7 @@
  */
 
 use core\invalid_persistent_exception;
+use Firebase\JWT\JWT;
 use tool_ilioscategoryassignment\sync_job;
 
 defined('MOODLE_INTERNAL') || die();
@@ -88,5 +89,29 @@ class tool_ilioscategoryassignment_generator extends component_generator_base {
         $syncjob->create();
 
         return $syncjob;
+    }
+
+    /**
+     * Generates an un-expired JWT, to be used as access token.
+     * This token will pass client-side token validation.
+     *
+     * @return string
+     */
+    public function create_valid_ilios_api_access_token(): string {
+        $key = 'doesnotmatterhere';
+        $payload = ['exp' => (new DateTime('10 days'))->getTimestamp()];
+        return JWT::encode($payload, $key, 'HS256');
+    }
+
+    /**
+     * Generates an expired - and therefore invalid - JWT, to be used as access token.
+     * This token will fail client-side token validation.
+     *
+     * @return string
+     */
+    public function create_invalid_ilios_api_access_token(): string {
+        $key = 'doesnotmatterhere';
+        $payload = ['exp' => (new DateTime('-2 days'))->getTimestamp()];
+        return JWT::encode($payload, $key, 'HS256');
     }
 }

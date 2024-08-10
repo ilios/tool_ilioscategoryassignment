@@ -161,7 +161,7 @@ class ilios {
         }
 
         // Decode token payload. will throw an exception if this fails.
-        $tokenpayload = $this->get_access_token_payload($accesstoken);
+        $tokenpayload = self::get_access_token_payload($accesstoken);
 
         // Check if token is expired.
         if ($tokenpayload['exp'] < time()) {
@@ -176,7 +176,7 @@ class ilios {
      * @return array the token payload as key/value pairs.
      * @throws moodle_exception
      */
-    protected function get_access_token_payload(string $accesstoken): array {
+    public static function get_access_token_payload(string $accesstoken): array {
         $parts = explode('.', $accesstoken);
         if (count($parts) !== 3) {
             throw new moodle_exception('errorinvalidnumbertokensegments', 'tool_ilioscategoryassignment');
