@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Provides test coverage for the sync job model.
+ *
+ * @category   test
+ * @package    tool_ilioscategoryassignment
+ * @copyright  The Regents of the University of California
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace tool_ilioscategoryassignment;
 
 use advanced_testcase;
@@ -23,10 +32,11 @@ use moodle_exception;
 /**
  * Test case for the sync_job class.
  *
+ * @category   test
  * @package    tool_ilioscategoryassignment
  * @copyright  The Regents of the University of California
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @covers \tool_ilioscategoryassignment\sync_job
+ * @covers     \tool_ilioscategoryassignment\sync_job
  */
 final class sync_job_test extends advanced_testcase {
 
@@ -55,7 +65,9 @@ final class sync_job_test extends advanced_testcase {
     }
 
     /**
-     * Checks that the sync_job::before_delete() callback works as intended on job deletion.
+     * Checks that all course category role assignments for users managed by this plugin are removed when their
+     * corresponding sync job is deleted.
+     * See <code>\tool_ilioscategoryassignment\sync_job::before_delete()</code>.
      *
      * @return void
      * @throws coding_exception
@@ -71,19 +83,34 @@ final class sync_job_test extends advanced_testcase {
         $roleid = $dg->create_role();
         $user1 = $dg->create_user();
         $user2 = $dg->create_user();
+        $user3 = $dg->create_user();
         $syncjob = $lpg->create_sync_job(['coursecatid' => $category->id, 'schoolid' => 1, 'roleid' => $roleid]);
 
         $context = $category->get_context();
 
+        // These users have role assignments made by this plugin.
         role_assign($roleid, $user1->id, $context->id, 'tool_ilioscategoryassignment');
         role_assign($roleid, $user2->id, $context->id, 'tool_ilioscategoryassignment');
+        // This user is "manually" assigned.
+        role_assign($roleid, $user3->id, $context->id);
 
         $this->assertTrue(user_has_role_assignment($user1->id, $roleid, $context->id));
-        $this->assertTrue(user_has_role_assignment($user1->id, $roleid, $context->id));
+        $this->assertTrue(user_has_role_assignment($user2->id, $roleid, $context->id));
+        $this->assertTrue(user_has_role_assignment($user3->id, $roleid, $context->id));
 
         $syncjob->delete();
 
-        $this->assertFalse(user_has_role_assignment($user1->id, $roleid, $context->id));
-        $this->assertFalse(user_has_role_assignment($user1->id, $roleid, $context->id));
+        $this->assertFalse(
+            user_has_role_assignment($user1->id, $roleid, $context->id),
+            'The plugin-managed role assignment for user1 has been removed'
+        );
+        $this->assertFalse(
+            user_has_role_assignment($user2->id, $roleid, $context->id),
+            'The plugin-managed role assignment for user2 has been removed'
+        );
+        $this->assertTrue(
+            user_has_role_assignment($user3->id, $roleid, $context->id),
+            'The out-of-band managed role assignment for user3 persists.'
+        );
     }
 }

@@ -15,26 +15,27 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Test fixtures generator testcase.
+ * Tests fixtures generator.
  *
+ * @category   test
  * @package    tool_ilioscategoryassignment
  * @copyright  The Regents of the University of California
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 namespace tool_ilioscategoryassignment;
 
 use advanced_testcase;
 use coding_exception;
-use Firebase\JWT\JWT;
-use moodle_exception;
 
 /**
  * Tests the fixture generator for tests.
  *
+ * @category   test
  * @package    tool_ilioscategoryassignment
  * @copyright  The Regents of the University of California
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @covers \tool_ilioscategoryassignment_generator
+ * @covers     \tool_ilioscategoryassignment_generator
  */
 final class generator_test extends advanced_testcase {
 
@@ -84,30 +85,6 @@ final class generator_test extends advanced_testcase {
         $syncjob = $lpg->create_sync_job($props);
         $this->assertEquals(4, sync_job::count_records());
         $this->assertEquals('Sync job 4', $syncjob->get('title'));
-    }
-
-    /**
-     * Checks that the generator function creates a valid access token.
-     * @return void
-     * @throws moodle_exception
-     */
-    public function test_create_valid_ilios_api_access_token(): void {
-        $lpg = $this->getDataGenerator()->get_plugin_generator('tool_ilioscategoryassignment');
-        $accesstoken = $lpg->create_valid_ilios_api_access_token();
-        $tokenpayload = ilios::get_access_token_payload($accesstoken);
-        $this->assertLessThan($tokenpayload['exp'], time(), 'Token expiration date is in the future.');
-    }
-
-    /**
-     * Checks that the generator function creates an invalid access token.
-     * @return void
-     * @throws moodle_exception
-     */
-    public function test_create_invalid_ilios_api_access_token(): void {
-        $lpg = $this->getDataGenerator()->get_plugin_generator('tool_ilioscategoryassignment');
-        $accesstoken = $lpg->create_invalid_ilios_api_access_token();
-        $tokenpayload = ilios::get_access_token_payload($accesstoken);
-        $this->assertLessThan(time(), $tokenpayload['exp'], 'Token expiration date is in the past.');
     }
 }
 

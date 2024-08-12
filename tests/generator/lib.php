@@ -15,16 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Competency data generator.
+ * The data generator for this plugin.
  *
- * @package    tool_ilioscategoryassignment
  * @category   test
- * @copyright  2015 Frédéric Massart - FMCorz.net
+ * @package    tool_ilioscategoryassignment
+ * @copyright  The Regents of the University of California
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 use core\invalid_persistent_exception;
-use Firebase\JWT\JWT;
 use tool_ilioscategoryassignment\sync_job;
 
 defined('MOODLE_INTERNAL') || die();
@@ -35,6 +33,7 @@ require_once($CFG->libdir . '/grade/grade_scale.php');
 /**
  * Test data generator class for this plugin.
  *
+ * @category   test
  * @package    tool_ilioscategoryassignment
  * @copyright  The Regents of the University of California
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -42,7 +41,7 @@ require_once($CFG->libdir . '/grade/grade_scale.php');
 class tool_ilioscategoryassignment_generator extends component_generator_base {
 
     /** @var int Number of created sync jobs. */
-    protected $syncjobcount = 0;
+    protected int $syncjobcount = 0;
 
     /**
      * Resets internal instance counter.
@@ -89,29 +88,5 @@ class tool_ilioscategoryassignment_generator extends component_generator_base {
         $syncjob->create();
 
         return $syncjob;
-    }
-
-    /**
-     * Generates an un-expired JWT, to be used as access token.
-     * This token will pass client-side token validation.
-     *
-     * @return string
-     */
-    public function create_valid_ilios_api_access_token(): string {
-        $key = 'doesnotmatterhere';
-        $payload = ['exp' => (new DateTime('10 days'))->getTimestamp()];
-        return JWT::encode($payload, $key, 'HS256');
-    }
-
-    /**
-     * Generates an expired - and therefore invalid - JWT, to be used as access token.
-     * This token will fail client-side token validation.
-     *
-     * @return string
-     */
-    public function create_invalid_ilios_api_access_token(): string {
-        $key = 'doesnotmatterhere';
-        $payload = ['exp' => (new DateTime('-2 days'))->getTimestamp()];
-        return JWT::encode($payload, $key, 'HS256');
     }
 }

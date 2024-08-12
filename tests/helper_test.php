@@ -15,8 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Handles configuration and Ilios client management.
+ * Test coverage for the test helpers.
  *
+ * @category   test
  * @package    tool_ilioscategoryassignment
  * @copyright  The Regents of the University of California
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -24,37 +25,40 @@
 
 namespace tool_ilioscategoryassignment;
 
-use coding_exception;
-use core\event\course_category_deleted;
-use curl;
-use local_iliosapiclient\ilios_client;
+use basic_testcase;
 use moodle_exception;
-
-defined('MOODLE_INTERNAL') || die();
-
-require_once($CFG->libdir . '/accesslib.php');
+use tool_ilioscategoryassignment\tests\helper;
 
 /**
- * Handler class event callbacks and Ilios API client management.
+ * Tests the test helper class.
  *
- * In other words, this is the kitchen sink.
- * This is obviously less than ideal, but still better than polluting the global namespace with functions in locallib.php.
- * [ST 2017/07/24]
- *
+ * @category   test
  * @package    tool_ilioscategoryassignment
  * @copyright  The Regents of the University of California
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @covers     \tool_ilioscategoryassignment\tests\helper
  */
-class manager {
+final class helper_test extends basic_testcase {
 
     /**
-     * Instantiates and returns an Ilios API client.
-     *
-     * @return ilios_client
+     * Checks that the generator function creates a valid access token.
+     * @return void
      * @throws moodle_exception
      */
-    public static function instantiate_ilios_client(): ilios_client {
-        $url = get_config('tool_ilioscategoryassignment', 'host_url') ?: '';
-        return new ilios_client($url, new curl());
+    public function test_create_valid_ilios_api_access_token(): void {
+        $accesstoken = helper::create_valid_ilios_api_access_token();
+        $tokenpayload = ilios::get_access_token_payload($accesstoken);
+        $this->assertLessThan($tokenpayload['exp'], time(), 'Token expiration date is in the future.');
+    }
+
+    /**
+     * Checks that the generator function creates an invalid access token.
+     * @return void
+     * @throws moodle_exception
+     */
+    public function test_create_invalid_ilios_api_access_token(): void {
+        $accesstoken = helper::create_invalid_ilios_api_access_token();
+        $tokenpayload = ilios::get_access_token_payload($accesstoken);
+        $this->assertLessThan(time(), $tokenpayload['exp'], 'Token expiration date is in the past.');
     }
 }

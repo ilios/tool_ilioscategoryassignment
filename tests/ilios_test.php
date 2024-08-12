@@ -14,26 +14,35 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Test coverage for the Ilios API client.
+ *
+ * @category   test
+ * @package    tool_ilioscategoryassignment
+ * @copyright  The Regents of the University of California
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 namespace tool_ilioscategoryassignment;
 
 use advanced_testcase;
 use core\di;
 use core\http_client;
-use DateTime;
-use Firebase\JWT\JWT;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use moodle_exception;
+use tool_ilioscategoryassignment\tests\helper;
 
 /**
- * Sync task test.
+ * Tests the Ilios API client.
  *
+ * @category   test
  * @package    tool_ilioscategoryassignment
  * @copyright  The Regents of the University of California
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @covers \tool_ilioscategoryassignment\ilios
+ * @covers     \tool_ilioscategoryassignment\ilios
  */
 final class ilios_test extends advanced_testcase {
 
@@ -46,8 +55,7 @@ final class ilios_test extends advanced_testcase {
      */
     public function test_get_schools(): void {
         $this->resetAfterTest();
-        $lpg = $this->getDataGenerator()->get_plugin_generator('tool_ilioscategoryassignment');
-        $accesstoken = $lpg->create_valid_ilios_api_access_token();
+        $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
         $handlerstack = HandlerStack::create(new MockHandler([
             new Response(200, [], json_encode([
@@ -76,8 +84,7 @@ final class ilios_test extends advanced_testcase {
      */
     public function test_get_enabled_users_in_school(): void {
         $this->resetAfterTest();
-        $lpg = $this->getDataGenerator()->get_plugin_generator('tool_ilioscategoryassignment');
-        $accesstoken = $lpg->create_valid_ilios_api_access_token();
+        $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
         $handlerstack = HandlerStack::create(new MockHandler([
             new Response(200, [], json_encode([
@@ -106,8 +113,7 @@ final class ilios_test extends advanced_testcase {
      */
     public function test_get(): void {
         $this->resetAfterTest();
-        $lpg = $this->getDataGenerator()->get_plugin_generator('tool_ilioscategoryassignment');
-        $accesstoken = $lpg->create_valid_ilios_api_access_token();
+        $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
         $handlerstack = HandlerStack::create(new MockHandler([
             new Response(200, [], json_encode([
@@ -135,8 +141,7 @@ final class ilios_test extends advanced_testcase {
      */
     public function test_get_fails_on_garbled_response(): void {
         $this->resetAfterTest();
-        $lpg = $this->getDataGenerator()->get_plugin_generator('tool_ilioscategoryassignment');
-        $accesstoken = $lpg->create_valid_ilios_api_access_token();
+        $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
         $handlerstack = HandlerStack::create(new MockHandler([
             new Response(200, [], 'g00bleG0bble'),
@@ -156,8 +161,7 @@ final class ilios_test extends advanced_testcase {
      */
     public function test_get_fails_on_empty_response(): void {
         $this->resetAfterTest();
-        $lpg = $this->getDataGenerator()->get_plugin_generator('tool_ilioscategoryassignment');
-        $accesstoken = $lpg->create_valid_ilios_api_access_token();
+        $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
         $handlerstack = HandlerStack::create(new MockHandler([
             new Response(200, [], ''),
@@ -177,8 +181,7 @@ final class ilios_test extends advanced_testcase {
      */
     public function test_get_fails_on_error_response(): void {
         $this->resetAfterTest();
-        $lpg = $this->getDataGenerator()->get_plugin_generator('tool_ilioscategoryassignment');
-        $accesstoken = $lpg->create_valid_ilios_api_access_token();
+        $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
         $handlerstack = HandlerStack::create(new MockHandler([
             new Response(200, [], json_encode(['errors' => ['something went wrong']])),
@@ -199,8 +202,7 @@ final class ilios_test extends advanced_testcase {
     public function test_get_fails_on_server_side_error(): void {
         $this->resetAfterTest();
         set_config('host_url', 'http://ilios.demo', 'tool_ilioscategoryassignment');
-        $lpg = $this->getDataGenerator()->get_plugin_generator('tool_ilioscategoryassignment');
-        $accesstoken = $lpg->create_valid_ilios_api_access_token();
+        $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
         $handlerstack = HandlerStack::create(new MockHandler([
             new Response(500),
@@ -224,8 +226,7 @@ final class ilios_test extends advanced_testcase {
      */
     public function test_get_fails_with_expired_token(): void {
         $this->resetAfterTest();
-        $lpg = $this->getDataGenerator()->get_plugin_generator('tool_ilioscategoryassignment');
-        $accesstoken = $lpg->create_invalid_ilios_api_access_token();
+        $accesstoken = helper::create_invalid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
         $ilios = di::get(ilios::class);
         $this->expectException(moodle_exception::class);

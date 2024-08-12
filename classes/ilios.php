@@ -39,8 +39,6 @@ use moodle_exception;
  */
 class ilios {
 
-
-
     /**
      * @var string The API base path.
      */
