@@ -36,6 +36,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use moodle_exception;
+use Psr\Http\Message\RequestInterface;
 use tool_ilioscategoryassignment\tests\helper;
 
 /**
@@ -63,10 +64,12 @@ final class sync_task_test extends advanced_testcase {
         $dg = $this->getDataGenerator();
         $lpg = $dg->get_plugin_generator('tool_ilioscategoryassignment');
 
+        $schoolid = 1;
+
         // Create a course category, a user role, and sync job.
         $category = $dg->create_category();
         $roleid = $dg->create_role();
-        $syncjob = $lpg->create_sync_job(['coursecatid' => $category->id, 'schoolid' => 1, 'roleid' => $roleid]);
+        $syncjob = $lpg->create_sync_job(['coursecatid' => $category->id, 'schoolid' => $schoolid, 'roleid' => $roleid]);
 
         // Create some users.
         $dg->create_user(['idnumber' => 'xx00001']);
@@ -176,11 +179,28 @@ final class sync_task_test extends advanced_testcase {
         ];
         $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
+        set_config('host_url', 'http://ilios.demo', 'tool_ilioscategoryassignment');
+
         // Since the task will be run twice in this test, we'll need to set up two mock responses from Ilios.
         // We'll let the mocked API respond with the same payload twice in order to check that no state change occurs.
         $handlerstack = HandlerStack::create(new MockHandler([
-            new Response(200, [], json_encode($mockresponsepayload)),
-            new Response(200, [], json_encode($mockresponsepayload)),
+            function(RequestInterface $request) use ($schoolid, $mockresponsepayload) {
+                $this->assertEquals('/api/v3/users', $request->getUri()->getPath());
+                $this->assertEquals(
+                    "filters[enabled]=true&filters[school]={$schoolid}",
+                    urldecode($request->getUri()->getQuery())
+                );
+                return new Response(200, [], json_encode($mockresponsepayload));
+
+            },
+            function(RequestInterface $request) use ($schoolid, $mockresponsepayload) {
+                $this->assertEquals('/api/v3/users', $request->getUri()->getPath());
+                $this->assertEquals(
+                    "filters[enabled]=true&filters[school]={$schoolid}",
+                    urldecode($request->getUri()->getQuery())
+                );
+                return new Response(200, [], json_encode($mockresponsepayload));
+            },
         ]));
         di::set(http_client::class, new http_client(['handler' => $handlerstack]));
 
@@ -266,9 +286,11 @@ final class sync_task_test extends advanced_testcase {
         $dg = $this->getDataGenerator();
         $lpg = $dg->get_plugin_generator('tool_ilioscategoryassignment');
 
+        $schoolid = 1;
+
         $category = $dg->create_category();
         $roleid = $dg->create_role();
-        $syncjob = $lpg->create_sync_job(['coursecatid' => $category->id, 'schoolid' => 1, 'roleid' => $roleid]);
+        $syncjob = $lpg->create_sync_job(['coursecatid' => $category->id, 'schoolid' => $schoolid, 'roleid' => $roleid]);
         $user = $dg->create_user(['idnumber' => 'xx00001']);
 
         // Manually assign our test user the role into the course category.
@@ -276,14 +298,37 @@ final class sync_task_test extends advanced_testcase {
 
         $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
+        set_config('host_url', 'http://ilios.demo', 'tool_ilioscategoryassignment');
 
         $handlerstack = HandlerStack::create(new MockHandler([
             // User is in the payload, as instructor.
-            new Response(200, [], json_encode(['users' => [['campusId' => 'xx00001', 'instructorGroups' => [1]]]])),
+            function(RequestInterface $request) use ($schoolid) {
+                $this->assertEquals('/api/v3/users', $request->getUri()->getPath());
+                $this->assertEquals(
+                    "filters[enabled]=true&filters[school]={$schoolid}",
+                    urldecode($request->getUri()->getQuery())
+                );
+                return new Response(200, [], json_encode(['users' => [['campusId' => 'xx00001', 'instructorGroups' => [1]]]]));
+            },
             // User is in the payload, as director.
-            new Response(200, [], json_encode(['users' => [['campusId' => 'xx00001', 'directedCourses' => [1]]]])),
+            function(RequestInterface $request) use ($schoolid) {
+                $this->assertEquals('/api/v3/users', $request->getUri()->getPath());
+                $this->assertEquals(
+                    "filters[enabled]=true&filters[school]={$schoolid}",
+                    urldecode($request->getUri()->getQuery())
+                );
+                return new Response(200, [], json_encode(['users' => [['campusId' => 'xx00001', 'directedCourses' => [1]]]]));
+
+            },
             // User is not in payload.
-            new Response(200, [], json_encode(['users' => [['campusId' => 'xx99999']]])),
+            function(RequestInterface $request) use ($schoolid) {
+                $this->assertEquals('/api/v3/users', $request->getUri()->getPath());
+                $this->assertEquals(
+                    "filters[enabled]=true&filters[school]={$schoolid}",
+                    urldecode($request->getUri()->getQuery())
+                );
+                return new Response(200, [], json_encode(['users' => [['campusId' => 'xx99999']]]));
+            },
         ]));
         di::set(http_client::class, new http_client(['handler' => $handlerstack]));
 

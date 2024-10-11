@@ -33,6 +33,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use moodle_exception;
+use Psr\Http\Message\RequestInterface;
 use tool_ilioscategoryassignment\tests\helper;
 
 /**
@@ -57,13 +58,18 @@ final class ilios_test extends advanced_testcase {
         $this->resetAfterTest();
         $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
+        set_config('host_url', 'http://ilios.demo', 'tool_ilioscategoryassignment');
+
         $handlerstack = HandlerStack::create(new MockHandler([
-            new Response(200, [], json_encode([
-                'schools' => [
-                    ['id' => 1, 'title' => 'Medicine'],
-                    ['id' => 2, 'title' => 'Pharmacy'],
-                ],
-            ])),
+            function(RequestInterface $request) {
+                $this->assertEquals('/api/v3/schools', $request->getUri()->getPath());
+                return new Response(200, [], json_encode([
+                    'schools' => [
+                        ['id' => 1, 'title' => 'Medicine'],
+                        ['id' => 2, 'title' => 'Pharmacy'],
+                    ],
+                ]));
+            },
         ]));
         di::set(http_client::class, new http_client(['handler' => $handlerstack]));
         $ilios = di::get(ilios::class);
@@ -86,17 +92,27 @@ final class ilios_test extends advanced_testcase {
         $this->resetAfterTest();
         $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
+        set_config('host_url', 'http://ilios.demo', 'tool_ilioscategoryassignment');
+        $schoolid = 123;
+
         $handlerstack = HandlerStack::create(new MockHandler([
-            new Response(200, [], json_encode([
-                'users' => [
-                    ['id' => 1, 'campusId' => 'xx00001'],
-                    ['id' => 2, 'campusId' => 'xx00002'],
-                ],
-            ])),
+            function(RequestInterface $request) use ($schoolid) {
+                $this->assertEquals('/api/v3/users', $request->getUri()->getPath());
+                $this->assertEquals(
+                    "filters[enabled]=true&filters[school]={$schoolid}",
+                    urldecode($request->getUri()->getQuery())
+                );
+                return new Response(200, [], json_encode([
+                    'users' => [
+                        ['id' => 1, 'campusId' => 'xx00001'],
+                        ['id' => 2, 'campusId' => 'xx00002'],
+                    ],
+                ]));
+            },
         ]));
         di::set(http_client::class, new http_client(['handler' => $handlerstack]));
         $ilios = di::get(ilios::class);
-        $users = $ilios->get_enabled_users_in_school(123);
+        $users = $ilios->get_enabled_users_in_school($schoolid);
         $this->assertCount(2, $users);
         $this->assertEquals(1, $users[0]->id);
         $this->assertEquals('xx00001', $users[0]->campusId);
@@ -115,13 +131,18 @@ final class ilios_test extends advanced_testcase {
         $this->resetAfterTest();
         $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
+        set_config('host_url', 'http://ilios.demo', 'tool_ilioscategoryassignment');
+
         $handlerstack = HandlerStack::create(new MockHandler([
-            new Response(200, [], json_encode([
-                'schools' => [
-                    ['id' => 1, 'title' => 'Medicine'],
-                    ['id' => 2, 'title' => 'Pharmacy'],
-                ],
-            ])),
+            function (RequestInterface $request) {
+                $this->assertEquals('/api/v3/schools', $request->getUri()->getPath());
+                return new Response(200, [], json_encode([
+                    'schools' => [
+                        ['id' => 1, 'title' => 'Medicine'],
+                        ['id' => 2, 'title' => 'Pharmacy'],
+                    ],
+                ]));
+            },
         ]));
         di::set(http_client::class, new http_client(['handler' => $handlerstack]));
         $ilios = di::get(ilios::class);
@@ -143,6 +164,7 @@ final class ilios_test extends advanced_testcase {
         $this->resetAfterTest();
         $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
+        set_config('host_url', 'http://ilios.demo', 'tool_ilioscategoryassignment');
         $handlerstack = HandlerStack::create(new MockHandler([
             new Response(200, [], 'g00bleG0bble'),
         ]));
@@ -163,6 +185,7 @@ final class ilios_test extends advanced_testcase {
         $this->resetAfterTest();
         $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
+        set_config('host_url', 'http://ilios.demo', 'tool_ilioscategoryassignment');
         $handlerstack = HandlerStack::create(new MockHandler([
             new Response(200, [], ''),
         ]));
@@ -183,6 +206,7 @@ final class ilios_test extends advanced_testcase {
         $this->resetAfterTest();
         $accesstoken = helper::create_valid_ilios_api_access_token();
         set_config('apikey', $accesstoken, 'tool_ilioscategoryassignment');
+        set_config('host_url', 'http://ilios.demo', 'tool_ilioscategoryassignment');
         $handlerstack = HandlerStack::create(new MockHandler([
             new Response(200, [], json_encode(['errors' => ['something went wrong']])),
         ]));
@@ -347,4 +371,3 @@ final class ilios_test extends advanced_testcase {
         ];
     }
 }
-
