@@ -77,12 +77,7 @@ class sync_task extends scheduled_task {
             return;
         }
 
-        try {
-            $iliosclient = di::get(ilios::class);
-        } catch (Exception $e) {
-            // Re-throw exception.
-            throw new Exception('ERROR: Failed to instantiate Ilios client.', $e);
-        }
+        $iliosclient = di::get(ilios::class);
 
         // Run enabled each sync job.
         foreach ($syncjobs as $syncjob) {

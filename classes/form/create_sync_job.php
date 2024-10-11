@@ -76,8 +76,9 @@ class create_sync_job extends moodleform {
             $roleoptions[$role->id] = $role->localname;
         }
 
+        $iliosclient = di::get(ilios::class);
+
         try {
-            $iliosclient = di::get(ilios::class);
             $iliosschools = $iliosclient->get_schools();
             if (!empty($iliosschools)) {
                 $iliosschools = array_column($iliosschools, 'title', 'id');
