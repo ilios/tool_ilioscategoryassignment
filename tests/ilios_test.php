@@ -31,6 +31,7 @@ use core\http_client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use moodle_exception;
 use Psr\Http\Message\RequestInterface;
@@ -61,19 +62,21 @@ final class ilios_test extends advanced_testcase {
         set_config('host_url', 'http://ilios.demo', 'tool_ilioscategoryassignment');
 
         $handlerstack = HandlerStack::create(new MockHandler([
-            function(RequestInterface $request) {
-                $this->assertEquals('/api/v3/schools', $request->getUri()->getPath());
-                return new Response(200, [], json_encode([
+                new Response(200, [], json_encode([
                     'schools' => [
                         ['id' => 1, 'title' => 'Medicine'],
                         ['id' => 2, 'title' => 'Pharmacy'],
                     ],
-                ]));
-            },
+                ])),
         ]));
+        $container = [];
+        $history = Middleware::history($container);
+        $handlerstack->push($history);
         di::set(http_client::class, new http_client(['handler' => $handlerstack]));
         $ilios = di::get(ilios::class);
         $schools = $ilios->get_schools();
+
+        $this->assertEquals('/api/v3/schools', $container[0]['request']->getUri()->getPath());
         $this->assertCount(2, $schools);
         $this->assertEquals(1, $schools[0]->id);
         $this->assertEquals('Medicine', $schools[0]->title);
@@ -96,23 +99,25 @@ final class ilios_test extends advanced_testcase {
         $schoolid = 123;
 
         $handlerstack = HandlerStack::create(new MockHandler([
-            function(RequestInterface $request) use ($schoolid) {
-                $this->assertEquals('/api/v3/users', $request->getUri()->getPath());
-                $this->assertEquals(
-                    "filters[enabled]=true&filters[school]={$schoolid}",
-                    urldecode($request->getUri()->getQuery())
-                );
-                return new Response(200, [], json_encode([
+                new Response(200, [], json_encode([
                     'users' => [
                         ['id' => 1, 'campusId' => 'xx00001'],
                         ['id' => 2, 'campusId' => 'xx00002'],
                     ],
-                ]));
-            },
+                ])),
         ]));
+        $container = [];
+        $history = Middleware::history($container);
+        $handlerstack->push($history);
         di::set(http_client::class, new http_client(['handler' => $handlerstack]));
         $ilios = di::get(ilios::class);
         $users = $ilios->get_enabled_users_in_school($schoolid);
+
+        $this->assertEquals('/api/v3/users',  $container[0]['request']->getUri()->getPath());
+        $this->assertEquals(
+            "filters[enabled]=true&filters[school]={$schoolid}",
+            urldecode( $container[0]['request']->getUri()->getQuery())
+        );
         $this->assertCount(2, $users);
         $this->assertEquals(1, $users[0]->id);
         $this->assertEquals('xx00001', $users[0]->campusId);
@@ -134,19 +139,21 @@ final class ilios_test extends advanced_testcase {
         set_config('host_url', 'http://ilios.demo', 'tool_ilioscategoryassignment');
 
         $handlerstack = HandlerStack::create(new MockHandler([
-            function (RequestInterface $request) {
-                $this->assertEquals('/api/v3/schools', $request->getUri()->getPath());
-                return new Response(200, [], json_encode([
-                    'schools' => [
-                        ['id' => 1, 'title' => 'Medicine'],
-                        ['id' => 2, 'title' => 'Pharmacy'],
-                    ],
-                ]));
-            },
+            new Response(200, [], json_encode([
+                'schools' => [
+                    ['id' => 1, 'title' => 'Medicine'],
+                    ['id' => 2, 'title' => 'Pharmacy'],
+                ],
+            ])),
         ]));
+        $container = [];
+        $history = Middleware::history($container);
+        $handlerstack->push($history);
         di::set(http_client::class, new http_client(['handler' => $handlerstack]));
         $ilios = di::get(ilios::class);
         $data = $ilios->get('schools');
+
+        $this->assertEquals('/api/v3/schools', $container[0]['request']->getUri()->getPath());
         $this->assertCount(2, $data->schools);
         $this->assertEquals(1, $data->schools[0]->id);
         $this->assertEquals('Medicine', $data->schools[0]->title);

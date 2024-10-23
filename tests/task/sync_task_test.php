@@ -34,6 +34,7 @@ use dml_exception;
 use Exception;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use moodle_exception;
 use Psr\Http\Message\RequestInterface;
@@ -184,24 +185,12 @@ final class sync_task_test extends advanced_testcase {
         // Since the task will be run twice in this test, we'll need to set up two mock responses from Ilios.
         // We'll let the mocked API respond with the same payload twice in order to check that no state change occurs.
         $handlerstack = HandlerStack::create(new MockHandler([
-            function(RequestInterface $request) use ($schoolid, $mockresponsepayload) {
-                $this->assertEquals('/api/v3/users', $request->getUri()->getPath());
-                $this->assertEquals(
-                    "filters[enabled]=true&filters[school]={$schoolid}",
-                    urldecode($request->getUri()->getQuery())
-                );
-                return new Response(200, [], json_encode($mockresponsepayload));
-
-            },
-            function(RequestInterface $request) use ($schoolid, $mockresponsepayload) {
-                $this->assertEquals('/api/v3/users', $request->getUri()->getPath());
-                $this->assertEquals(
-                    "filters[enabled]=true&filters[school]={$schoolid}",
-                    urldecode($request->getUri()->getQuery())
-                );
-                return new Response(200, [], json_encode($mockresponsepayload));
-            },
+                new Response(200, [], json_encode($mockresponsepayload)),
+                new Response(200, [], json_encode($mockresponsepayload)),
         ]));
+        $container = [];
+        $history = Middleware::history($container);
+        $handlerstack->push($history);
         di::set(http_client::class, new http_client(['handler' => $handlerstack]));
 
         // Instantiate the task.
@@ -250,6 +239,18 @@ final class sync_task_test extends advanced_testcase {
         $task->execute();
         $output = ob_get_contents();
         ob_end_clean();
+
+        // Check the captured request history.
+        $this->assertEquals('/api/v3/users', $container[0]['request']->getUri()->getPath());
+        $this->assertEquals(
+            "filters[enabled]=true&filters[school]={$schoolid}",
+            urldecode($container[0]['request']->getUri()->getQuery())
+        );
+        $this->assertEquals('/api/v3/users', $container[1]['request']->getUri()->getPath());
+        $this->assertEquals(
+            "filters[enabled]=true&filters[school]={$schoolid}",
+            urldecode($container[1]['request']->getUri()->getQuery())
+        );
 
         // Check the captured task output.
         $this->assertStringContainsString('Retrieved 5 Ilios user(s) to sync.', $output);
@@ -302,34 +303,15 @@ final class sync_task_test extends advanced_testcase {
 
         $handlerstack = HandlerStack::create(new MockHandler([
             // User is in the payload, as instructor.
-            function(RequestInterface $request) use ($schoolid) {
-                $this->assertEquals('/api/v3/users', $request->getUri()->getPath());
-                $this->assertEquals(
-                    "filters[enabled]=true&filters[school]={$schoolid}",
-                    urldecode($request->getUri()->getQuery())
-                );
-                return new Response(200, [], json_encode(['users' => [['campusId' => 'xx00001', 'instructorGroups' => [1]]]]));
-            },
+            new Response(200, [], json_encode(['users' => [['campusId' => 'xx00001', 'instructorGroups' => [1]]]])),
             // User is in the payload, as director.
-            function(RequestInterface $request) use ($schoolid) {
-                $this->assertEquals('/api/v3/users', $request->getUri()->getPath());
-                $this->assertEquals(
-                    "filters[enabled]=true&filters[school]={$schoolid}",
-                    urldecode($request->getUri()->getQuery())
-                );
-                return new Response(200, [], json_encode(['users' => [['campusId' => 'xx00001', 'directedCourses' => [1]]]]));
-
-            },
+            new Response(200, [], json_encode(['users' => [['campusId' => 'xx00001', 'directedCourses' => [1]]]])),
             // User is not in payload.
-            function(RequestInterface $request) use ($schoolid) {
-                $this->assertEquals('/api/v3/users', $request->getUri()->getPath());
-                $this->assertEquals(
-                    "filters[enabled]=true&filters[school]={$schoolid}",
-                    urldecode($request->getUri()->getQuery())
-                );
-                return new Response(200, [], json_encode(['users' => [['campusId' => 'xx99999']]]));
-            },
+            new Response(200, [], json_encode(['users' => [['campusId' => 'xx99999']]])),
         ]));
+        $container = [];
+        $history = Middleware::history($container);
+        $handlerstack->push($history);
         di::set(http_client::class, new http_client(['handler' => $handlerstack]));
 
         // Instantiate the task.
@@ -371,6 +353,23 @@ final class sync_task_test extends advanced_testcase {
         $task->execute();
         $output = ob_get_contents();
         ob_end_clean();
+
+        // Check the captured request history.
+        $this->assertEquals('/api/v3/users', $container[0]['request']->getUri()->getPath());
+        $this->assertEquals(
+            "filters[enabled]=true&filters[school]={$schoolid}",
+            urldecode($container[0]['request']->getUri()->getQuery())
+        );
+        $this->assertEquals('/api/v3/users', $container[1]['request']->getUri()->getPath());
+        $this->assertEquals(
+            "filters[enabled]=true&filters[school]={$schoolid}",
+            urldecode($container[1]['request']->getUri()->getQuery())
+        );
+        $this->assertEquals('/api/v3/users', $container[2]['request']->getUri()->getPath());
+        $this->assertEquals(
+            "filters[enabled]=true&filters[school]={$schoolid}",
+            urldecode($container[2]['request']->getUri()->getQuery())
+        );
 
         // Check the captured task output.
         $this->assertStringContainsString('No user assignment/un-assignment necessary.', $output);
