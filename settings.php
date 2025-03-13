@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-    $ADMIN->add('root', new admin_category(
+    $ADMIN->add('tools', new admin_category(
         'ilioscategoryassignment',
         get_string('pluginname', 'tool_ilioscategoryassignment')));
 
