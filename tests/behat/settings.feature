@@ -7,7 +7,6 @@ Feature: Plugin administration
   Background:
     Given I log in as "admin"
 
-  @javascript
   Scenario: Links to sync management and settings forms are visible under plugins
     When I select "Site administration" from primary navigation
     And I select "Plugins" from secondary navigation
