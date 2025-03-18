@@ -26,13 +26,12 @@ namespace tool_ilioscategoryassignment\form;
 
 defined('MOODLE_INTERNAL') || die();
 
-use core\di;
 use core_course_category;
 use Exception;
 use moodle_page;
 use moodleform;
-use tool_ilioscategoryassignment\ilios;
 use tool_ilioscategoryassignment\output\renderer;
+use tool_ilioscategoryassignment\utils;
 
 require_once($CFG->libdir . '/accesslib.php');
 require_once($CFG->libdir . '/formslib.php');
@@ -76,7 +75,7 @@ class create_sync_job extends moodleform {
             $roleoptions[$role->id] = $role->localname;
         }
 
-        $iliosclient = di::get(ilios::class);
+        $iliosclient = utils::get_ilios_client();
 
         try {
             $iliosschools = $iliosclient->get_schools();

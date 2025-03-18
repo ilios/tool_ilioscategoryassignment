@@ -26,6 +26,7 @@ use core\di;
 use core\output\notification;
 use tool_ilioscategoryassignment\ilios;
 use tool_ilioscategoryassignment\sync_job;
+use tool_ilioscategoryassignment\utils;
 
 require_once(__DIR__ . '/../../../config.php');
 
@@ -117,7 +118,7 @@ if (!empty($jobs)) {
 
 try {
     $accesstoken = get_config('tool_ilioscategoryassignment', 'apikey') ?: '';
-    $iliosclient = di::get(ilios::class);
+    $iliosclient = utils::get_ilios_client();
     $iliosschools = $iliosclient->get_schools();
     $iliosschools = array_column($iliosschools, 'title', 'id');
 } catch (Exception $e) {

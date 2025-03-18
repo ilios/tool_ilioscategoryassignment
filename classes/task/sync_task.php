@@ -25,7 +25,7 @@
 namespace tool_ilioscategoryassignment\task;
 
 use coding_exception;
-use core\di;
+
 use core\task\scheduled_task;
 use core_course_category;
 use dml_exception;
@@ -34,6 +34,7 @@ use moodle_exception;
 use stdClass;
 use tool_ilioscategoryassignment\ilios;
 use tool_ilioscategoryassignment\sync_job;
+use tool_ilioscategoryassignment\utils;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -77,7 +78,7 @@ class sync_task extends scheduled_task {
             return;
         }
 
-        $iliosclient = di::get(ilios::class);
+        $iliosclient = utils::get_ilios_client();
 
         // Run enabled each sync job.
         foreach ($syncjobs as $syncjob) {
