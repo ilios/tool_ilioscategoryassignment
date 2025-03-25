@@ -67,7 +67,7 @@ class renderer extends plugin_renderer_base {
             get_string('iliosschool', 'tool_ilioscategoryassignment'),
             get_string('actions'),
         ];
-        $table->attributes['class'] = 'admintable generaltable';
+        $table->attributes['class'] = 'admintable generaltable tool-ilioscategoryassignment-sync-jobs';
         $data = [];
 
         foreach ($syncjobs as $job) {

@@ -34,7 +34,6 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Response;
 use moodle_exception;
-use Psr\Http\Message\RequestInterface;
 use tool_ilioscategoryassignment\tests\helper;
 
 /**

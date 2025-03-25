@@ -1,23 +1,39 @@
 @tool @tool_ilioscategoryassignment @tool_ilioscategoryassignment_settings
-Feature: Plugin administration
-  In order to manage category syncs
+Feature: Plugin settings
+  In order to add and update Ilios connection details
   As an admin
-  I want to configure plugin settings and create/update/delete sync instances
+  I want to configure plugin settings
 
   Background:
     Given I log in as "admin"
 
-  Scenario: Links to sync management and settings forms are visible under plugins
+  Scenario: Settings form with default values
     When I select "Site administration" from primary navigation
-    And I select "Plugins" from secondary navigation
-    Then I should see "Ilios category assignment"
-    And I should see "Sync jobs"
-    And I should see "New sync job"
-    And I should see "Ilios API client configuration"
+    And I follow "Ilios API client configuration"
+    Then the following fields match these values:
+      | Host URL      | localhost |
+      | Ilios API key |           |
 
-  Scenario: Links to sync management and settings forms are visible under admin tools
-    Given I navigate to "Plugins > Admin tools" in site administration
-    When I follow "Category: Ilios category assignment"
-    Then I should see "Sync jobs"
-    And I should see "New sync job"
-    And I should see "Ilios API client configuration"
+  Scenario: Settings form with customized values
+    Given the following config values are set as admin:
+      | host_url | http://ilios.demo | tool_ilioscategoryassignment |
+      | apikey   | XXXXXX            | tool_ilioscategoryassignment |
+    When I select "Site administration" from primary navigation
+    And I follow "Ilios API client configuration"
+    Then the following fields match these values:
+      | Host URL      | http://ilios.demo |
+      | Ilios API key | XXXXXX            |
+
+  Scenario: Update settings
+    When I select "Site administration" from primary navigation
+    And I follow "Ilios API client configuration"
+    Then the following fields match these values:
+      | Host URL      | localhost |
+      | Ilios API key |           |
+    When I set the following fields to these values:
+      | Host URL      | http://ilios.demo |
+      | Ilios API key | XXXXXX            |
+    And I press "Save changes"
+    Then the following fields match these values:
+      | Host URL      | http://ilios.demo |
+      | Ilios API key | XXXXXX            |
