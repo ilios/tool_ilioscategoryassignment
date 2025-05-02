@@ -83,9 +83,15 @@ function xmldb_tool_ilioscategoryassignment_upgrade($oldversion): bool {
             $DB->update_record($tablename, $job);
         }
 
-        $table->add_key('usermodified', XMLDB_KEY_FOREIGN, ['usermodified'], 'user', ['id']);
-
         upgrade_plugin_savepoint(true, 2024080600, 'tool', 'ilioscategoryassignment');
+    }
+
+    if ($oldversion < 2024121702) {
+        $tablename = 'tool_ilioscategoryassignment';
+        $table = new xmldb_table($tablename);
+        $key = new xmldb_key('usermodified', XMLDB_KEY_FOREIGN, ['usermodified'], 'user', ['id']);
+        $dbman->add_key($table, $key);
+        upgrade_plugin_savepoint(true, 2024121702, 'tool', 'ilioscategoryassignment');
     }
 
     return true;
