@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2024121701;       // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2024121702;       // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires  = 2024100100;       // Requires this Moodle version.
 $plugin->component = 'tool_ilioscategoryassignment';     // Full name of the plugin (used for diagnostics).
 $plugin->release = 'v4.5';
