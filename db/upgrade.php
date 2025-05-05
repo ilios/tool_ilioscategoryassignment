@@ -83,9 +83,20 @@ function xmldb_tool_ilioscategoryassignment_upgrade($oldversion): bool {
             $DB->update_record($tablename, $job);
         }
 
-        $table->add_key('usermodified', XMLDB_KEY_FOREIGN, ['usermodified'], 'user', ['id']);
-
         upgrade_plugin_savepoint(true, 2024080600, 'tool', 'ilioscategoryassignment');
+    }
+
+    if ($oldversion < 2024102301) {
+        // Adds fkey/index that did not stick during a previous migration.
+        $table = new xmldb_table('tool_ilioscategoryassignment');
+        $key = new xmldb_key('usermodified', XMLDB_KEY_FOREIGN, ['usermodified'], 'user', ['id']);
+        $dbman->add_key($table, $key);
+
+        // Undo the 0 default value on schoolid - it's not in the schema definition, and it's not needed.
+        $field = new xmldb_field('schoolid', XMLDB_TYPE_INTEGER, '10', null, true, null, null, 'title');
+        $dbman->change_field_default($table, $field);
+
+        upgrade_plugin_savepoint(true, 2024102301, 'tool', 'ilioscategoryassignment');
     }
 
     return true;
