@@ -100,7 +100,7 @@ class behat_tool_ilioscategoryassignment_behat_base extends behat_base {
     protected function assert_sync_job_in_row_status(string $rownumber, bool $enabled): void {
         $arialabel = $enabled ? "Disable" : "Enable";
         $xpath = $this->get_xpath_to_status_action_for_sync_job_in_row($rownumber);
-        $xpath .= "/i[contains(@aria-label, '$arialabel')]";
+        $xpath .= "[contains(@aria-label, '$arialabel')]";
         $params = [$xpath, "xpath_element"];
         $this->execute("behat_general::should_exist", $params);
     }
