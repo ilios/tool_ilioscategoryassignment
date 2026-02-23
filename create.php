@@ -66,6 +66,3 @@ if ($data) {
     $mform->display();
     echo $OUTPUT->footer();
 }
-
-
-

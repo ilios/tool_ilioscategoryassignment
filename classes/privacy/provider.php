@@ -42,8 +42,6 @@ use core_privacy\local\request\userlist;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements core_userlist_provider, data_provider, metadata_provider {
-
-
     /**
      * Returns the metadata for the user data stored in this plugin.
      *

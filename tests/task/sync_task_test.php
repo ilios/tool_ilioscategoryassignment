@@ -50,7 +50,6 @@ use tool_ilioscategoryassignment\tests\helper;
  * @covers     \tool_ilioscategoryassignment\task\sync_task
  */
 final class sync_task_test extends advanced_testcase {
-
     /**
      * Tests task execution, checks that category role assignment/unassignment works as intended.
      * @return void

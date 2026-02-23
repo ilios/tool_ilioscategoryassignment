@@ -46,7 +46,6 @@ use tool_ilioscategoryassignment\tests\helper;
  * @covers     \tool_ilioscategoryassignment\ilios
  */
 final class ilios_test extends advanced_testcase {
-
     /**
      * Tests the happy path on get_schools().
      *
@@ -112,10 +111,10 @@ final class ilios_test extends advanced_testcase {
         $ilios = di::get(ilios::class);
         $users = $ilios->get_enabled_users_in_school($schoolid);
 
-        $this->assertEquals('/api/v3/users',  $container[0]['request']->getUri()->getPath());
+        $this->assertEquals('/api/v3/users', $container[0]['request']->getUri()->getPath());
         $this->assertEquals(
             "filters[enabled]=true&filters[school]={$schoolid}",
-            urldecode( $container[0]['request']->getUri()->getQuery())
+            urldecode($container[0]['request']->getUri()->getQuery())
         );
         $this->assertCount(2, $users);
         $this->assertEquals(1, $users[0]->id);

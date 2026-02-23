@@ -38,7 +38,6 @@ use Psr\Http\Message\ResponseInterface;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class ilios_backend {
-
     /**
      * @var array A list of mock Ilios school data.
      */
@@ -64,7 +63,7 @@ class ilios_backend {
         $path = $uri->getPath();
 
         // Route by path.
-        $response = match($path) {
+        $response = match ($path) {
             '/api/v3/schools' => $this->get_all_schools_response(),
             default => new Response(500),
         };

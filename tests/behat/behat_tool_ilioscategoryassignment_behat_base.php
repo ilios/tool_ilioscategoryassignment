@@ -24,7 +24,7 @@
 
 use tool_ilioscategoryassignment\tests\helper;
 
-require_once(__DIR__.'/../../../../../lib/behat/behat_base.php');
+require_once(__DIR__ . '/../../../../../lib/behat/behat_base.php');
 
 
 /**
@@ -35,7 +35,6 @@ require_once(__DIR__.'/../../../../../lib/behat/behat_base.php');
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class behat_tool_ilioscategoryassignment_behat_base extends behat_base {
-
     /**
      * Create and store a valid API access token in the plugin configuration.
      *

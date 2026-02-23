@@ -39,7 +39,6 @@ use moodle_exception;
  * @covers     \tool_ilioscategoryassignment\sync_job
  */
 final class sync_job_test extends advanced_testcase {
-
     /**
      * Checks that sync_job::get_course_category() works as intended.
      *

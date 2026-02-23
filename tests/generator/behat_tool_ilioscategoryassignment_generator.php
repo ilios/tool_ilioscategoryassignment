@@ -25,7 +25,6 @@ declare(strict_types=1);
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class behat_tool_ilioscategoryassignment_generator extends behat_generator_base {
-
     /**
      * Get the list of creatable entities for tool_ilioscategoryassignment.
      *

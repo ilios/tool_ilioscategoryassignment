@@ -100,8 +100,12 @@ class create_sync_job extends moodleform {
         $mform->addElement('select', 'roleid', get_string('selectrole', 'tool_ilioscategoryassignment'), $roleoptions);
         $mform->addRule('roleid', null, 'required', null, 'client');
 
-        $mform->addElement('select', 'iliosschoolid', get_string('selectiliosschool', 'tool_ilioscategoryassignment'),
-            $iliosschools);
+        $mform->addElement(
+            'select',
+            'iliosschoolid',
+            get_string('selectiliosschool', 'tool_ilioscategoryassignment'),
+            $iliosschools
+        );
         $mform->addRule('iliosschoolid', null, 'required', null, 'client');
 
         $this->add_action_buttons(false, get_string('submit'));
