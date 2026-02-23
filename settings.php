@@ -27,7 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 if ($hassiteconfig) {
     $ADMIN->add('tools', new admin_category(
         'ilioscategoryassignment',
-        get_string('pluginname', 'tool_ilioscategoryassignment')));
+        get_string('pluginname', 'tool_ilioscategoryassignment')
+    ));
 
     // Sync jobs admin page.
     $ADMIN->add('ilioscategoryassignment', new admin_externalpage(
@@ -52,16 +53,25 @@ if ($hassiteconfig) {
         'moodle/site:config'
     );
 
-    $settings->add(new admin_setting_heading('tool_ilioscategoryassignment_settings', '',
-        get_string('clientconfig_desc', 'tool_ilioscategoryassignment')));
+    $settings->add(new admin_setting_heading(
+        'tool_ilioscategoryassignment_settings',
+        '',
+        get_string('clientconfig_desc', 'tool_ilioscategoryassignment')
+    ));
 
     if (!during_initial_install()) {
-        $settings->add(new admin_setting_configtext('tool_ilioscategoryassignment/host_url',
+        $settings->add(new admin_setting_configtext(
+            'tool_ilioscategoryassignment/host_url',
             get_string('host_url', 'tool_ilioscategoryassignment'),
-            get_string('host_url_desc', 'tool_ilioscategoryassignment'), 'localhost'));
-        $settings->add(new admin_setting_configtext('tool_ilioscategoryassignment/apikey',
+            get_string('host_url_desc', 'tool_ilioscategoryassignment'),
+            'localhost'
+        ));
+        $settings->add(new admin_setting_configtext(
+            'tool_ilioscategoryassignment/apikey',
             get_string('apikey', 'tool_ilioscategoryassignment'),
-            get_string('apikey_desc', 'tool_ilioscategoryassignment'), ''));
+            get_string('apikey_desc', 'tool_ilioscategoryassignment'),
+            ''
+        ));
     }
 
     $ADMIN->add('ilioscategoryassignment', $settings);

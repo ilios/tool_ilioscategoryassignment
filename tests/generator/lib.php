@@ -39,7 +39,6 @@ require_once($CFG->libdir . '/grade/grade_scale.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class tool_ilioscategoryassignment_generator extends component_generator_base {
-
     /** @var int Number of created sync jobs. */
     protected int $syncjobcount = 0;
 

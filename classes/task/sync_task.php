@@ -25,7 +25,6 @@
 namespace tool_ilioscategoryassignment\task;
 
 use coding_exception;
-
 use core\task\scheduled_task;
 use core_course_category;
 use dml_exception;
@@ -139,7 +138,7 @@ class sync_task extends scheduled_task {
         }
 
         // Filter out any users that do not fulfill a director or instructor function in ilios.
-        $records = array_filter($records, function(stdClass $rec) {
+        $records = array_filter($records, function (stdClass $rec) {
             return ! empty($rec->directedCourses) ||
                    ! empty($rec->directedPrograms) ||
                    ! empty($rec->directedSchools) ||
@@ -150,7 +149,8 @@ class sync_task extends scheduled_task {
         });
 
         foreach ($records as $rec) {
-            if (object_property_exists($rec, 'campusId')
+            if (
+                object_property_exists($rec, 'campusId')
                 && '' !== trim($rec->campusId)
             ) {
                 $iliosusers[] = $rec->campusId;
@@ -173,7 +173,7 @@ class sync_task extends scheduled_task {
         if (empty($iliosusers)) {
             return [];
         }
-        list($insql, $params) = $DB->get_in_or_equal($iliosusers);
+        [$insql, $params] = $DB->get_in_or_equal($iliosusers);
         $sql = "SELECT * FROM {user} WHERE idnumber $insql";
         $users = $DB->get_records_sql($sql, $params);
         if (count($users) < count($iliosusers)) {
@@ -209,7 +209,7 @@ class sync_task extends scheduled_task {
 
         // Filter out any role assignments that weren't made by this plugin.
         $roleassignments = array_values(
-            array_filter($roleassignments, function($role) {
+            array_filter($roleassignments, function ($role) {
                 return $role->component === 'tool_ilioscategoryassignment';
             })
         );
@@ -251,7 +251,6 @@ class sync_task extends scheduled_task {
                 $unassignmentcounter++;
             }
             mtrace("Un-assigned $unassignmentcounter user(s) from category.");
-
         }
         mtrace("Finished syncing course category '$formattedcategoryname'.");
     }

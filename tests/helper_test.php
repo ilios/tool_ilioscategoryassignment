@@ -39,7 +39,6 @@ use tool_ilioscategoryassignment\tests\helper;
  * @covers     \tool_ilioscategoryassignment\tests\helper
  */
 final class helper_test extends basic_testcase {
-
     /**
      * Checks that the generator function creates a valid access token.
      * @return void

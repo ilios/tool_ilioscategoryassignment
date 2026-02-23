@@ -82,7 +82,7 @@ class renderer extends plugin_renderer_base {
             $coursecatcell = new html_table_cell($coursetitle);
 
             $roleid = $job->get('roleid');
-            $roletitle = get_string('notfound', 'tool_ilioscategoryassignment',  $job->get('roleid'));
+            $roletitle = get_string('notfound', 'tool_ilioscategoryassignment', $job->get('roleid'));
             if (array_key_exists($roleid, $roles)) {
                 $roletitle = $roles[$roleid]->localname;
             }
@@ -99,21 +99,27 @@ class renderer extends plugin_renderer_base {
             $actions = [];
             if ($job->get('enabled')) {
                 $actions[] = $this->action_icon(
-                    new moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
-                        ['job_id' => $job->get('id'), 'action' => 'disable', 'sesskey' => sesskey()]),
+                    new moodle_url(
+                        "$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
+                        ['job_id' => $job->get('id'), 'action' => 'disable', 'sesskey' => sesskey()]
+                    ),
                     new pix_icon('t/hide', new lang_string('disable'))
                 );
             } else {
                 $actions[] = $this->action_icon(
-                    new moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
-                        ['job_id' => $job->get('id'), 'action' => 'enable', 'sesskey' => sesskey()]),
+                    new moodle_url(
+                        "$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
+                        ['job_id' => $job->get('id'), 'action' => 'enable', 'sesskey' => sesskey()]
+                    ),
                     new pix_icon('t/show', new lang_string('enable'))
                 );
             }
 
             $actions[] = $this->action_icon(
-                new moodle_url("$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
-                    ['job_id' => $job->get('id'), 'action' => 'delete', 'sesskey' => sesskey()]),
+                new moodle_url(
+                    "$CFG->wwwroot/$CFG->admin/tool/ilioscategoryassignment/index.php",
+                    ['job_id' => $job->get('id'), 'action' => 'delete', 'sesskey' => sesskey()]
+                ),
                 new pix_icon('t/delete', new lang_string('delete'))
             );
 

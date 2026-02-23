@@ -41,7 +41,6 @@ require_once($CFG->libdir . '/accesslib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class sync_job extends persistent {
-
     /**
      * @var string The sync job database table name.
      */

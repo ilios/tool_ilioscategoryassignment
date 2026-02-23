@@ -38,7 +38,6 @@ use coding_exception;
  * @covers     \tool_ilioscategoryassignment_generator
  */
 final class generator_test extends advanced_testcase {
-
     /**
      * Tests sync job generator.
      * @return void
@@ -87,4 +86,3 @@ final class generator_test extends advanced_testcase {
         $this->assertEquals('Sync job 4', $syncjob->get('title'));
     }
 }
-
