@@ -1,7 +1,7 @@
 name: Moodle Plugin CI
 
 permissions:
-  content: read
+  contents: read
 
 on:
   push:
